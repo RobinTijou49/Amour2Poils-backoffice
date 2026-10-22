@@ -14,6 +14,7 @@ Site vitrine existant, dont ce back-office reprend la direction artistique : <ht
 | | |
 |---|---|
 | **Nom** | Robin Tijou |
+| **Dépôt** | <https://github.com/RobinTijou49/Amour2Poils-backoffice> |
 | **IA utilisée** | Claude Code (Anthropic) |
 | **Méta-framework** | Next.js 16 (App Router) + TypeScript |
 | **Interpréteur ECMAScript** | Bun 1.4 |

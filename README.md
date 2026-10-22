@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Amour 2 Poils · Back-office
 
-## Getting Started
+Back-office de gestion de la pension canine **Amour 2 Poils** (éducation positive, pension et petsitting).
+Projet réalisé dans le cadre du TP de Front-end avancé (M1).
 
-First, run the development server:
+Site vitrine existant, dont ce back-office reprend la direction artistique : <https://robintijou49.github.io/Amour2Poils/>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Phase 1 · Choix et préparation
+
+### Identité
+
+| | |
+|---|---|
+| **Nom** | Robin Tijou |
+| **IA utilisée** | Claude Code (Anthropic) |
+| **Méta-framework** | Next.js 16 (App Router) + TypeScript |
+| **Interpréteur ECMAScript** | Bun 1.4 |
+| **Base de données** | PostgreSQL 17 + Prisma ORM 7 |
+| **Thème présenté à l'oral** | Thème 6 · PWA et ses possibilités |
+
+### Thématique
+
+Amour 2 Poils accueille des chiens en pension, fait du petsitting à domicile et donne des cours d'éducation
+positive. Aujourd'hui, le site vitrine présente l'activité mais toute la gestion se fait à la main
+(agenda papier, tableur, messages). Le back-office centralise cette gestion.
+
+**Utilisateurs**
+
+- **Gérant·e (rôle ADMIN)** : accès complet, facturation, paramétrage des boxes et des tarifs.
+- **Employé·e (rôle EMPLOYEE)** : planning du jour, arrivées et départs, fiches des chiens, sorties de stock.
+  Utilise surtout un téléphone, parfois sans réseau dans les espaces extérieurs.
+
+**Problèmes réglés**
+
+- Savoir en un coup d'œil quels chiens arrivent, partent ou sont présents aujourd'hui, et quelles boxes sont libres.
+- Avoir sous la main les informations sensibles de chaque chien : allergies, régime, comportement, vétérinaire,
+  vaccins à jour ou non.
+- Ne plus tomber en rupture de croquettes : suivi du stock et alerte de seuil bas.
+- Facturer les séjours et les séances sans ressaisie.
+
+### Fonctionnalités par module
+
+| Module | Indispensable | Bonus |
+|---|---|---|
+| **Réservations pension** | Calendrier des séjours, attribution d'une box, statuts (en attente, confirmée, en cours, terminée, annulée), check-in / check-out, refus si la box est pleine | Glisser-déposer dans le planning (avec alternative clavier), tarif dégressif |
+| **Clients et chiens** | Fiches propriétaires et chiens, vaccins avec date d'expiration, allergies, régime, notes de comportement, vétérinaire | Photos, historique des séjours par chien |
+| **Stock** | Produits, entrées / sorties, seuil d'alerte, historique des mouvements | Sortie automatique des repas selon les chiens présents |
+| **Facturation** | Facture générée depuis une réservation ou une séance, numérotation, statut de paiement | Export PDF, paiement en ligne (mode test) |
+| **Séances éducation et petsitting** | Planning des cours (particulier, collectif, puppy class) et des visites, inscriptions | Feuille de présence |
+| **Tableau de bord** | Arrivées / départs du jour, taux d'occupation, alertes stock et vaccins | Graphiques mensuels |
+| **PWA** | Installable, planning du jour et fiches chiens hors connexion, notifications push (nouvelle réservation, stock bas, vaccin expiré) | Check-in hors ligne synchronisé au retour du réseau |
+
+### Modèle de données
+
+Défini dans [`prisma/schema.prisma`](prisma/schema.prisma).
+
+```mermaid
+erDiagram
+  Owner ||--o{ Dog : possède
+  Owner ||--o{ Invoice : reçoit
+  Dog ||--o{ Vaccination : a
+  Dog ||--o{ Booking : séjourne
+  Kennel ||--o{ Booking : accueille
+  Dog ||--o{ Enrollment : participe
+  TrainingSession ||--o{ Enrollment : contient
+  Invoice ||--o{ InvoiceLine : détaille
+  Booking ||--o{ InvoiceLine : facturé
+  Enrollment ||--o{ InvoiceLine : facturé
+  Product ||--o{ StockMovement : mouvemente
+  User ||--o{ StockMovement : saisit
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Les montants sont en centimes (`Int`) pour éviter les erreurs d'arrondi des nombres flottants.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Justification des choix techniques
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js** : le méta-framework le plus utilisé. Il permet dans une même application le rendu côté client,
+  côté serveur, statique et les Server Components, ce qui est nécessaire pour la comparaison CSR / SSR / SSG de la
+  phase 3. Le backend intégré (Route Handlers et Server Actions) suffit pour l'API du back-office.
+- **Bun** : interpréteur rapide, TypeScript exécuté sans étape de compilation, gestionnaire de paquets et test runner
+  intégrés, hachage de mots de passe argon2id natif (`Bun.password`). Next.js est lancé avec `bun --bun` pour
+  utiliser réellement Bun comme runtime, pas seulement comme gestionnaire de paquets.
+- **PostgreSQL + Prisma** : base relationnelle adaptée aux relations du domaine (clients, chiens, séjours, factures),
+  schéma typé et migrations versionnées. Prisma 7 se connecte via l'adaptateur `@prisma/adapter-pg`.
+  La CLI est fixée en 7.10.1 : le tag `latest` de npm pointe vers une version 8 en release candidate.
+- **Tailwind CSS 4** : les tokens de la DA du site vitrine sont déclarés une fois dans
+  [`globals.css`](src/app/globals.css) et réutilisés partout.
+- **Claude Code** : utilisé pour le scaffolding, la revue de code et le refactoring. Les règles de travail sont dans
+  [`CLAUDE.md`](CLAUDE.md) et chaque usage notable est consigné dans le [journal IA](docs/journal-ia.md).
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Lancer le projet
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Prérequis : [Bun](https://bun.sh) ≥ 1.4 et Docker Desktop.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cp .env.example .env      # puis adapter les valeurs si besoin
+bun install               # génère aussi le client Prisma
+bun run db:up             # lance PostgreSQL (port 5433)
+bun run db:migrate        # applique les migrations
+bun run db:seed           # données de démonstration fictives
+bun run dev               # http://localhost:3000
+```
 
-## Deploy on Vercel
+Vérifier que l'API et la base répondent : <http://localhost:3000/api/health>
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Script | Rôle |
+|---|---|
+| `dev` / `build` / `start` | Next.js exécuté par Bun |
+| `lint` / `typecheck` | ESLint et vérification TypeScript |
+| `db:up` / `db:down` | Démarre ou arrête PostgreSQL (Docker) |
+| `db:migrate` | Crée et applique une migration après modification du schéma |
+| `db:generate` | Régénère le client Prisma |
+| `db:seed` / `db:reset` | Remplit la base / la réinitialise |
+| `db:studio` | Interface Prisma Studio |
+
+## Structure
+
+```
+prisma/              schéma, migrations, seed
+src/app/             routes Next.js (pages et API)
+src/lib/             code serveur partagé (client Prisma…)
+src/generated/       client Prisma généré (non versionné)
+docs/                suivi du projet (todo list, journal IA)
+```
+
+## Suivi
+
+- Todo list du TP : <https://claude.ai/artifact/RJq6bfB3CYz1hfetKG7qG3> (source : [`docs/todo-tp.html`](docs/todo-tp.html))
+- Journal d'utilisation de l'IA : [`docs/journal-ia.md`](docs/journal-ia.md)

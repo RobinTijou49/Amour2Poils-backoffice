@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
+/* Design tokens repris du site vitrine (robintijou49.github.io/Amour2Poils). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background: #fdfcf9;
+  --background-alt: #f5f1e8;
+  --foreground: #3d3a34;
+  --foreground-light: #6b6559;
+  --border: #e6e0d4;
+  --sage: #8a9a7e;
+  --sage-dark: #6f7f64;
+  --brown: #a9825f;
+  --brown-dark: #8a6845;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1d1c19;
+    --background-alt: #26241f;
+    --foreground: #ece7dc;
+    --foreground-light: #b3ab9b;
+    --border: #3d3a33;
+    --sage: #a9b99c;
+    --sage-dark: #c1cfb5;
+    --brown: #d2ac85;
+    --brown-dark: #e2c3a2;
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-alt: var(--background-alt);
+  --color-foreground: var(--foreground);
+  --color-foreground-light: var(--foreground-light);
+  --color-border: var(--border);
+  --color-sage: var(--sage);
+  --color-sage-dark: var(--sage-dark);
+  --color-brown: var(--brown);
+  --color-brown-dark: var(--brown-dark);
+  --font-sans: var(--font-nunito);
+  --font-heading: var(--font-quicksand);
+  --radius-md: 14px;
+  --radius-lg: 26px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-quicksand), system-ui, sans-serif;
 }

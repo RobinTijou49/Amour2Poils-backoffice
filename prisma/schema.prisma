@@ -1,0 +1,249 @@
+// Modèle de données du back-office Amour 2 Poils.
+// Les montants sont stockés en centimes (Int) pour éviter les erreurs d'arrondi.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────── Équipe ─────────────
+
+enum Role {
+  ADMIN // gérant·e : accès complet
+  EMPLOYEE // employé·e : planning, check-in, stock
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String
+  passwordHash   String
+  role           Role            @default(EMPLOYEE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  stockMovements StockMovement[]
+}
+
+// ───────────── Clients et chiens ─────────────
+
+model Owner {
+  id        String    @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?   @unique
+  phone     String
+  address   String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  dogs      Dog[]
+  invoices  Invoice[]
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+model Dog {
+  id            String        @id @default(cuid())
+  name          String
+  breed         String?
+  sex           Sex
+  birthDate     DateTime?     @db.Date
+  weightKg      Decimal?      @db.Decimal(5, 2)
+  sterilized    Boolean       @default(false)
+  chipNumber    String?       @unique
+  allergies     String?
+  diet          String?
+  behaviorNotes String?
+  vetName       String?
+  vetPhone      String?
+  ownerId       String
+  owner         Owner         @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  vaccinations  Vaccination[]
+  bookings      Booking[]
+  enrollments   Enrollment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([ownerId])
+}
+
+model Vaccination {
+  id             String   @id @default(cuid())
+  name           String // ex. CHPPiL, rage, toux du chenil
+  administeredAt DateTime @db.Date
+  expiresAt      DateTime @db.Date
+  dogId          String
+  dog            Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@index([dogId])
+  @@index([expiresAt])
+}
+
+// ───────────── Pension ─────────────
+
+enum KennelSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+model Kennel {
+  id       String     @id @default(cuid())
+  name     String     @unique // ex. « Box 1 »
+  size     KennelSize
+  capacity Int        @default(1) // chiens d'une même famille peuvent partager
+  active   Boolean    @default(true)
+  bookings Booking[]
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id               String        @id @default(cuid())
+  startDate        DateTime      @db.Date
+  endDate          DateTime      @db.Date
+  status           BookingStatus @default(PENDING)
+  nightlyRateCents Int
+  notes            String?
+  checkedInAt      DateTime?
+  checkedOutAt     DateTime?
+  dogId            String
+  dog              Dog           @relation(fields: [dogId], references: [id], onDelete: Restrict)
+  kennelId         String?
+  kennel           Kennel?       @relation(fields: [kennelId], references: [id], onDelete: SetNull)
+  invoiceLines     InvoiceLine[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([startDate, endDate])
+  @@index([dogId])
+  @@index([kennelId])
+}
+
+// ───────────── Stock ─────────────
+
+enum ProductCategory {
+  FOOD
+  TREAT
+  HYGIENE
+  MEDICAL
+  OTHER
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  category       ProductCategory
+  unit           String // ex. « sac 15 kg », « boîte »
+  quantity       Int             @default(0) // tenu à jour à chaque mouvement
+  alertThreshold Int             @default(0)
+  movements      StockMovement[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  type      MovementType
+  quantity  Int // toujours positif, le sens est donné par `type`
+  reason    String?
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime     @default(now())
+
+  @@index([productId, createdAt])
+}
+
+// ───────────── Éducation et petsitting ─────────────
+
+enum SessionType {
+  PRIVATE // cours particulier
+  GROUP // cours collectif
+  PUPPY_CLASS
+  PETSITTING // visite à domicile
+}
+
+model TrainingSession {
+  id          String       @id @default(cuid())
+  type        SessionType
+  title       String
+  startsAt    DateTime
+  durationMin Int
+  capacity    Int          @default(1)
+  priceCents  Int
+  location    String?
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+
+  @@index([startsAt])
+}
+
+model Enrollment {
+  id           String          @id @default(cuid())
+  attended     Boolean?
+  sessionId    String
+  session      TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  dogId        String
+  dog          Dog             @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  invoiceLines InvoiceLine[]
+
+  @@unique([sessionId, dogId])
+}
+
+// ───────────── Facturation ─────────────
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+model Invoice {
+  id       String        @id @default(cuid())
+  number   String        @unique // ex. « F-2026-0001 »
+  status   InvoiceStatus @default(DRAFT)
+  issuedAt DateTime      @default(now())
+  dueAt    DateTime?
+  paidAt   DateTime?
+  ownerId  String
+  owner    Owner         @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  lines    InvoiceLine[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model InvoiceLine {
+  id             String      @id @default(cuid())
+  label          String
+  quantity       Int
+  unitPriceCents Int
+  invoiceId      String
+  invoice        Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  bookingId      String?
+  booking        Booking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  enrollmentId   String?
+  enrollment     Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+}

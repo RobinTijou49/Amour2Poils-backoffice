@@ -1,0 +1,296 @@
+<title>Feuille de route Amour 2 Poils</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Quicksand:wght@500;600;700&display=swap">
+<style>
+/* Layout : en-tête de projet, sommaire des phases, puis une section par phase avec ses tâches cochables. DA reprise du site vitrine. */
+:root {
+  --bg: #fdfcf9;
+  --bg-alt: #f5f1e8;
+  --surface: #ffffff;
+  --fg: #3d3a34;
+  --fg-soft: #6b6559;
+  --line: #e6e0d4;
+  --sage: #6f7f64;
+  --sage-soft: #e3e8dd;
+  --brown: #8a6845;
+  --brown-soft: #efe4d6;
+  --danger: #a3412f;
+  --font-head: "Quicksand", "Trebuchet MS", sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --r-md: 14px;
+  --r-lg: 22px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1c19; --bg-alt: #26241f; --surface: #2a2823; --fg: #ece7dc; --fg-soft: #b3ab9b;
+    --line: #3d3a33; --sage: #a9b99c; --sage-soft: #333a2e; --brown: #d2ac85; --brown-soft: #3b3127;
+    --danger: #e98a77; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d1c19; --bg-alt: #26241f; --surface: #2a2823; --fg: #ece7dc; --fg-soft: #b3ab9b;
+  --line: #3d3a33; --sage: #a9b99c; --sage-soft: #333a2e; --brown: #d2ac85; --brown-soft: #3b3127;
+  --danger: #e98a77; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-head); text-wrap: balance; margin: 0; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--brown); outline-offset: 2px; border-radius: 6px; }
+
+/* En-tête */
+.top { display: grid; gap: 18px; }
+.eyebrow { font-family: var(--font-head); font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--sage); }
+h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; line-height: 1.15; }
+.lede { margin: 0; color: var(--fg-soft); max-width: 62ch; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.stack li { background: var(--bg-alt); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+.stack b { font-weight: 700; color: var(--fg-soft); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+
+/* Progression globale */
+.overall { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px 22px; display: grid; gap: 14px; }
+.overall-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.overall-num { font-family: var(--font-head); font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.overall-num small { font-size: 16px; color: var(--fg-soft); font-weight: 600; }
+.bar { height: 10px; border-radius: 999px; background: var(--bg-alt); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 0; background: var(--sage); border-radius: inherit; transition: width .35s ease; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 36px; }
+.filters button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+/* Sommaire des phases */
+.toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.toc a { display: grid; gap: 6px; text-decoration: none; color: inherit; padding: 12px 14px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); height: 100%; }
+.toc a:hover { border-color: var(--sage); }
+.toc .k { font-size: 12px; font-weight: 700; color: var(--sage); text-transform: uppercase; letter-spacing: .08em; }
+.toc .n { font-family: var(--font-head); font-weight: 700; line-height: 1.25; }
+.toc .c { font-size: 13px; color: var(--fg-soft); font-variant-numeric: tabular-nums; }
+.toc .bar { height: 5px; }
+.toc a.complete .k { color: var(--brown); }
+.toc a.complete .bar > span { background: var(--brown); }
+
+/* Phases */
+.phase { display: grid; gap: 12px; scroll-margin-top: 16px; }
+.phase-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+.phase-head h2 { font-size: 22px; }
+.phase-head h2 .k { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); margin-bottom: 2px; }
+.phase-count { font-variant-numeric: tabular-nums; color: var(--fg-soft); font-weight: 600; font-size: 14px; }
+.phase-desc { margin: 0; color: var(--fg-soft); font-size: 15px; max-width: 70ch; }
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.task { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
+.task input[type="checkbox"] { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--sage); cursor: pointer; }
+.task label { cursor: pointer; min-width: 0; display: grid; gap: 2px; }
+.task .t { font-weight: 600; overflow-wrap: anywhere; }
+.task .d { font-size: 14px; color: var(--fg-soft); overflow-wrap: anywhere; }
+.task.done { background: transparent; }
+.task.done .t { text-decoration: line-through; text-decoration-color: var(--fg-soft); color: var(--fg-soft); font-weight: 400; }
+.task .del { border: 0; background: transparent; color: var(--fg-soft); cursor: pointer; border-radius: 8px; min-width: 32px; min-height: 32px; font-size: 18px; line-height: 1; }
+.task .del:hover { color: var(--danger); background: var(--bg-alt); }
+.confirm { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; font-size: 13px; }
+.confirm button { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 4px 10px; cursor: pointer; min-height: 32px; font-size: 13px; }
+.confirm .yes { background: var(--danger); color: var(--bg); border-color: var(--danger); }
+
+.add { display: flex; gap: 8px; flex-wrap: wrap; }
+.add input { flex: 1 1 240px; min-width: 0; border: 1px dashed var(--line); background: transparent; border-radius: var(--r-md); padding: 10px 12px; min-height: 44px; }
+.add input:focus { border-style: solid; border-color: var(--sage); outline: none; box-shadow: 0 0 0 3px var(--sage-soft); }
+.add button { border: 0; background: var(--sage); color: var(--bg); font-weight: 700; border-radius: var(--r-md); padding: 0 18px; min-height: 44px; cursor: pointer; }
+.empty-phase { color: var(--fg-soft); font-size: 14px; font-style: italic; margin: 0; }
+
+.notice { background: var(--brown-soft); border-radius: var(--r-md); padding: 14px 16px; font-size: 15px; }
+.notice[hidden] { display: none; }
+.foot { color: var(--fg-soft); font-size: 13px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">🐾 Amour 2 Poils · Back-office · TP Front-end avancé</span>
+    <h1>Feuille de route du projet</h1>
+    <p class="lede">Back-office de la pension canine : réservations, clients et chiens, stock, facturation et séances d'éducation. Coche les tâches au fil de l'eau, ajoute celles qui manquent.</p>
+    <ul class="stack" aria-label="Choix techniques">
+      <li><b>Framework</b>Next.js + TypeScript</li>
+      <li><b>Runtime</b>Bun</li>
+      <li><b>BDD</b>PostgreSQL + Prisma</li>
+      <li><b>IA</b>Claude Code</li>
+      <li><b>Oral</b>Thème 6 · PWA</li>
+    </ul>
+  </header>
+
+  <section class="overall" aria-labelledby="overall-title">
+    <div class="overall-head">
+      <h2 id="overall-title" class="eyebrow">Avancement global</h2>
+      <div class="overall-num" id="overall-num">0 <small>/ 0 tâches</small></div>
+    </div>
+    <div class="bar" role="progressbar" aria-labelledby="overall-title" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="overall-bar"><span></span></div>
+    <div class="filters" role="group" aria-label="Filtrer les tâches">
+      <button type="button" data-filter="all" aria-pressed="true">Toutes</button>
+      <button type="button" data-filter="todo" aria-pressed="false">À faire</button>
+      <button type="button" data-filter="done" aria-pressed="false">Faites</button>
+    </div>
+  </section>
+
+  <p class="notice" id="notice" hidden></p>
+
+  <nav aria-label="Phases du projet"><ul class="toc" id="toc"></ul></nav>
+
+  <main id="phases" style="display:grid;gap:36px"></main>
+
+  <p class="foot">La liste est enregistrée avec la page : elle est la même sur tous tes appareils.</p>
+</div>
+
+<script>
+const PHASES = [
+  { id: "prep", k: "Phase 1", name: "Choix et préparation", desc: "Nom, IA, méta-framework et interpréteur choisis, thématique expliquée, socle technique en place." },
+  { id: "maquette", k: "Phase 2 · Dév", name: "Maquette Figma et interface", desc: "Maquette fidèle à la DA du site vitrine, transformée en interface accessible." },
+  { id: "modules", k: "Phase 2 · Dév", name: "Modules métier et API", desc: "Fonctionnalités du back-office, API via le backend intégré à Next.js." },
+  { id: "pwa", k: "Phase 2 · Dév", name: "Capacités PWA", desc: "Installable, utilisable hors connexion, notifications push." },
+  { id: "tests", k: "Phase 3", name: "Tests et performances", desc: "Comparatif CSR / SSR / SSG, Lighthouse et WCAG 2.2, tests unitaires, intégration et E2E." },
+  { id: "secu", k: "Phase 4", name: "Sécurité", desc: "CSP, gestion des secrets, protections XSS et CSRF." },
+  { id: "prod", k: "Phase 5", name: "Mise en production", desc: "Docker, CI/CD et monitoring." },
+  { id: "oral", k: "Évaluation", name: "Présentations orales", desc: "Thème 6 (PWA) et présentation du projet, avec un regard critique sur le code généré par l'IA." }
+];
+
+const state = { tasks: [], filter: "all", confirming: null, db: null, readonly: false, loaded: false };
+const $ = (s, r = document) => r.querySelector(s);
+
+try { const f = localStorage.getItem("a2p-filter"); if (f) state.filter = f; } catch (e) {}
+
+function showNotice(msg) { const n = $("#notice"); n.textContent = msg; n.hidden = !msg; }
+
+function render() {
+  const total = state.tasks.length;
+  const done = state.tasks.filter(t => t.done).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  $("#overall-num").innerHTML = "";
+  $("#overall-num").append(String(done) + " ");
+  const sm = document.createElement("small"); sm.textContent = "/ " + total + " tâches · " + pct + " %";
+  $("#overall-num").append(sm);
+  const ob = $("#overall-bar"); ob.setAttribute("aria-valuenow", pct); ob.firstElementChild.style.width = pct + "%";
+  document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.filter === state.filter)));
+
+  const toc = $("#toc"); toc.innerHTML = "";
+  const main = $("#phases");
+  const focusedId = document.activeElement && document.activeElement.id;
+  main.innerHTML = "";
+
+  for (const p of PHASES) {
+    const list = state.tasks.filter(t => t.phase === p.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const pd = list.filter(t => t.done).length;
+    const ppct = list.length ? Math.round(pd / list.length * 100) : 0;
+
+    const li = document.createElement("li");
+    const a = document.createElement("a"); a.href = "#" + p.id;
+    if (list.length && pd === list.length) a.classList.add("complete");
+    a.innerHTML = '<span class="k"></span><span class="n"></span><span class="c"></span><div class="bar"><span></span></div>';
+    a.querySelector(".k").textContent = p.k;
+    a.querySelector(".n").textContent = p.name;
+    a.querySelector(".c").textContent = pd + " / " + list.length + (list.length && pd === list.length ? " · terminé" : "");
+    a.querySelector(".bar span").style.width = ppct + "%";
+    li.append(a); toc.append(li);
+
+    const sec = document.createElement("section"); sec.className = "phase"; sec.id = p.id;
+    sec.setAttribute("aria-labelledby", "h-" + p.id);
+    sec.innerHTML = '<div class="phase-head"><h2 id="h-' + p.id + '"><span class="k"></span><span class="nm"></span></h2><span class="phase-count"></span></div><p class="phase-desc"></p><ul class="tasks"></ul>';
+    sec.querySelector(".k").textContent = p.k;
+    sec.querySelector(".nm").textContent = p.name;
+    sec.querySelector(".phase-count").textContent = pd + " / " + list.length;
+    sec.querySelector(".phase-desc").textContent = p.desc;
+    const ul = sec.querySelector(".tasks");
+
+    const shown = list.filter(t => state.filter === "all" || (state.filter === "done" ? t.done : !t.done));
+    for (const t of shown) ul.append(taskEl(t));
+    if (!shown.length) {
+      const e = document.createElement("p"); e.className = "empty-phase";
+      e.textContent = !state.loaded ? "Chargement des tâches…" : list.length ? (state.filter === "todo" ? "Tout est fait dans cette phase." : "Aucune tâche cochée pour l'instant.") : "Aucune tâche. Ajoute la première ci-dessous.";
+      ul.replaceWith(e);
+    }
+
+    if (state.db && !state.readonly) {
+      const form = document.createElement("form"); form.className = "add";
+      form.innerHTML = '<label class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" for="add-' + p.id + '">Nouvelle tâche pour ' + p.name + '</label><input id="add-' + p.id + '" autocomplete="off" placeholder="Ajouter une tâche…" maxlength="200"><button type="submit">Ajouter</button>';
+      form.addEventListener("submit", ev => { ev.preventDefault(); addTask(p.id, form.querySelector("input")); });
+      sec.append(form);
+    }
+    main.append(sec);
+  }
+  if (focusedId) { const el = document.getElementById(focusedId); if (el) el.focus({ preventScroll: true }); }
+}
+
+function taskEl(t) {
+  const li = document.createElement("li"); li.className = "task" + (t.done ? " done" : "");
+  const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "cb-" + t.id; cb.checked = !!t.done;
+  cb.disabled = !state.db || state.readonly;
+  cb.addEventListener("change", () => toggle(t, cb.checked));
+  const lab = document.createElement("label"); lab.htmlFor = cb.id;
+  const tt = document.createElement("span"); tt.className = "t"; tt.textContent = t.title; lab.append(tt);
+  if (t.note) { const d = document.createElement("span"); d.className = "d"; d.textContent = t.note; lab.append(d); }
+  li.append(cb, lab);
+  if (state.db && !state.readonly) {
+    if (state.confirming === t.id) {
+      const c = document.createElement("div"); c.className = "confirm";
+      c.innerHTML = '<span>Supprimer ?</span>';
+      const y = document.createElement("button"); y.type = "button"; y.className = "yes"; y.id = "yes-" + t.id; y.textContent = "Supprimer";
+      y.addEventListener("click", () => removeTask(t));
+      const n = document.createElement("button"); n.type = "button"; n.textContent = "Annuler";
+      n.addEventListener("click", () => { state.confirming = null; render(); });
+      c.append(y, n); li.append(c);
+    } else {
+      const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.id = "del-" + t.id;
+      del.setAttribute("aria-label", "Supprimer « " + t.title + " »"); del.textContent = "×";
+      del.addEventListener("click", () => { state.confirming = t.id; render(); const y = document.getElementById("yes-" + t.id); if (y) y.focus(); });
+      li.append(del);
+    }
+  }
+  return li;
+}
+
+function writeError(e) {
+  if (e && e.code === "invalid_argument") { state.readonly = true; render(); showNotice("Tu peux consulter cette liste mais pas la modifier."); }
+  else if (e && e.code === "quota_exceeded") showNotice("La liste est pleine : supprime des tâches avant d'en ajouter.");
+  else showNotice("L'enregistrement a échoué. Vérifie ta connexion puis réessaie.");
+}
+
+async function toggle(t, done) {
+  try { await state.db.doc("tasks/" + t.id).update({ done }); showNotice(""); } catch (e) { writeError(e); }
+}
+
+async function addTask(phase, input) {
+  const title = input.value.trim(); if (!title) return;
+  const max = Math.max(0, ...state.tasks.filter(t => t.phase === phase).map(t => t.order ?? 0));
+  input.value = "";
+  try { await state.db.collection("tasks").add({ phase, title, note: "", done: false, order: max + 1 }); showNotice(""); }
+  catch (e) { input.value = title; writeError(e); }
+}
+
+async function removeTask(t) {
+  state.confirming = null;
+  try { await state.db.doc("tasks/" + t.id).delete(); showNotice(""); } catch (e) { writeError(e); render(); }
+}
+
+document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+  state.filter = b.dataset.filter;
+  try { localStorage.setItem("a2p-filter", state.filter); } catch (e) {}
+  render();
+}));
+
+render();
+
+(async () => {
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { state.loaded = true; render(); showNotice("Connecte-toi à claude.ai pour voir et cocher les tâches."); return; }
+  state.db = db;
+  db.collection("tasks").onSnapshot(snap => {
+    state.tasks = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    state.loaded = true;
+    render();
+  }, () => { state.loaded = true; render(); showNotice("La liste ne se met plus à jour. Recharge la page."); });
+})();
+</script>

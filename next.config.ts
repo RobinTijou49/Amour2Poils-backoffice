@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  // Sortie autonome pour l'image Docker : serveur minimal et dépendances tracées (voir Dockerfile).
+  output: "standalone",
   partialPrefetching: true,
   // Active forbidden() (page 403) pour les écrans réservés à un rôle.
   experimental: { authInterrupts: true },

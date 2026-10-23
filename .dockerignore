@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+.claude
+.agents
+docs
+*.md
+.env
+.env.*
+!.env.example
+docker-compose*.yml
+Dockerfile
+.dockerignore
+tsconfig.tsbuildinfo
+npm-debug.log*

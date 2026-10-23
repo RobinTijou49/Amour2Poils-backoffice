@@ -6,13 +6,13 @@ import { focusRing } from "./ui/button";
 import { Icon, type IconName } from "./ui/icons";
 
 // Client Component uniquement pour usePathname : marquer la page courante (aria-current).
-const links: { href: string; label: string; short: string; icon: IconName; mobile: boolean }[] = [
+const links: { href: string; label: string; short: string; icon: IconName; mobile: boolean; adminOnly?: boolean }[] = [
   { href: "/", label: "Tableau de bord", short: "Accueil", icon: "maison", mobile: true },
   { href: "/reservations", label: "Réservations", short: "Planning", icon: "calendrier", mobile: true },
   { href: "/chiens", label: "Clients et chiens", short: "Chiens", icon: "patte", mobile: true },
   { href: "/seances", label: "Séances", short: "Séances", icon: "education", mobile: false },
   { href: "/stock", label: "Stock", short: "Stock", icon: "stock", mobile: true },
-  { href: "/facturation", label: "Facturation", short: "Factures", icon: "facture", mobile: false },
+  { href: "/facturation", label: "Facturation", short: "Factures", icon: "facture", mobile: false, adminOnly: true },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -20,10 +20,10 @@ function isActive(pathname: string, href: string) {
 }
 
 // `pathname` vide = rendu de repli pendant le prérendu (aucun lien actif).
-export function SideNavLinks({ pathname }: { pathname: string }) {
+export function SideNavLinks({ pathname, isAdmin = false }: { pathname: string; isAdmin?: boolean }) {
   return (
     <ul className="flex flex-col gap-1">
-      {links.map((l) => {
+      {links.filter((l) => isAdmin || !l.adminOnly).map((l) => {
         const active = isActive(pathname, l.href);
         return (
           <li key={l.href}>
@@ -70,8 +70,8 @@ export function TabBarLinks({ pathname }: { pathname: string }) {
   );
 }
 
-export function SideNav() {
-  return <SideNavLinks pathname={usePathname()} />;
+export function SideNav({ isAdmin }: { isAdmin: boolean }) {
+  return <SideNavLinks pathname={usePathname()} isAdmin={isAdmin} />;
 }
 
 export function TabBar() {

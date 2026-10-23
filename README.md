@@ -136,6 +136,23 @@ Maquette : <https://www.figma.com/design/2ju0WFXMpBtETVELEKz6Ee>
   Avec `cacheComponents`, chaque requête appelle `connection()` et s'affiche dans un `<Suspense>` :
   la coquille est prérendue, les données sont streamées (*Partial Prerendering*).
 
+### Authentification et rôles
+
+Sessions maison, sans bibliothèque, pour maîtriser et expliquer chaque mécanisme :
+
+| Mécanisme | Où | Pourquoi |
+|---|---|---|
+| Mot de passe haché en argon2id (`Bun.password`) | [`actions.ts`](src/app/connexion/actions.ts), seed | Un mot de passe n'est jamais stocké en clair |
+| Jeton de session aléatoire (32 octets), seule son empreinte SHA-256 en base | [`session.ts`](src/lib/session.ts) | Une fuite de la base ne permet pas d'usurper une session |
+| Cookie `HttpOnly`, `SameSite=Lax`, `Secure` en production, 7 jours | [`session.ts`](src/lib/session.ts) | Illisible par JavaScript (XSS), non envoyé par les formulaires d'autres sites (CSRF) |
+| Message d'erreur identique et temps de vérification constant | [`actions.ts`](src/app/connexion/actions.ts) | Ne révèle pas si une adresse e-mail a un compte |
+| 5 échecs maximum en 15 minutes par adresse | table `LoginAttempt` | Freine les attaques par force brute |
+| `proxy.ts` : redirection si pas de cookie | [`proxy.ts`](src/proxy.ts) | Vérification rapide, mais **pas** une sécurité |
+| Vérification de la session dans chaque lecture de données | [`auth.ts`](src/lib/auth.ts), [`queries.ts`](src/lib/queries.ts) | Data Access Layer : aucune donnée sans utilisateur connecté |
+| Rôles : Facturation réservée à la gérance (`forbidden()` → page 403) | [`auth.ts`](src/lib/auth.ts) | L'employé ne voit ni le lien ni les données |
+
+Comptes de développement créés par le seed : voir `SEED_ADMIN_*` et `SEED_EMPLOYEE_*` dans `.env`.
+
 ---
 
 ## Lancer le projet

@@ -32,13 +32,29 @@ async function main() {
     prisma.vaccination.deleteMany(),
     prisma.dog.deleteMany(),
     prisma.owner.deleteMany(),
+    prisma.session.deleteMany(),
+    prisma.loginAttempt.deleteMany(),
     prisma.user.deleteMany(),
   ]);
 
   // Bun.password utilise argon2id par défaut.
   const admin = await prisma.user.create({
-    data: { email, name: "Gérant·e", role: "ADMIN", passwordHash: await Bun.password.hash(password) },
+    data: { email, name: "Claire Morel", role: "ADMIN", passwordHash: await Bun.password.hash(password) },
   });
+  const testEmail = process.env.SEED_TEST_EMAIL;
+  const testPassword = process.env.SEED_TEST_PASSWORD;
+  if (testEmail && testPassword) {
+    await prisma.user.create({
+      data: { email: testEmail, name: "Compte test", role: "ADMIN", passwordHash: await Bun.password.hash(testPassword) },
+    });
+  }
+  const employeeEmail = process.env.SEED_EMPLOYEE_EMAIL;
+  const employeePassword = process.env.SEED_EMPLOYEE_PASSWORD;
+  if (employeeEmail && employeePassword) {
+    await prisma.user.create({
+      data: { email: employeeEmail, name: "Hugo Lefèvre", role: "EMPLOYEE", passwordHash: await Bun.password.hash(employeePassword) },
+    });
+  }
 
   const kennels = await Promise.all(
     [
@@ -158,7 +174,7 @@ async function main() {
   await invoice("F-2026-0004", ines.id, "SENT", -3, 4, "Pension Pepper (3 nuits)", 3, 2000);
   await invoice("F-2026-0005", camille.id, "DRAFT", 0, null, "Pension Rex (5 nuits)", 5, 2500, rexStay.id);
 
-  console.log("Seed terminé : 1 admin, 6 boxes, 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures.");
+  console.log("Seed terminé : 1 admin, 1 employé, 6 boxes, 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures.");
 }
 
 main()

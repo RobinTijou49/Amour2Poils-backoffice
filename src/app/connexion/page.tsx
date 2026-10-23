@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icons";
+import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "Connexion" };
 
-// Écran statique pour l'instant : la logique d'authentification arrive avec la tâche mod-01.
 export default function LoginPage() {
   return (
     <div className="grid min-h-full flex-1 grid-cols-1 md:grid-cols-[1fr_640px]">
@@ -18,15 +16,11 @@ export default function LoginPage() {
         </p>
       </section>
       <main className="flex items-center justify-center px-4 py-12">
-        <form className="flex w-full max-w-[440px] flex-col gap-5 rounded-lg border border-border bg-surface p-10 shadow-[0_10px_30px_rgba(61,58,52,0.08)]">
+        <div className="flex w-full max-w-[440px] flex-col gap-5 rounded-lg border border-border bg-surface p-10 shadow-[0_10px_30px_rgba(61,58,52,0.08)]">
           <h1 className="text-2xl font-bold">Connexion</h1>
           <p className="text-foreground-light">Accès réservé à l&apos;équipe de la pension.</p>
-          <Field label="Adresse e-mail" name="email" type="email" autoComplete="username" required />
-          <Field label="Mot de passe" name="password" type="password" autoComplete="current-password" required />
-          <Button type="submit" className="w-full">
-            Se connecter
-          </Button>
-        </form>
+          <LoginForm />
+        </div>
       </main>
     </div>
   );

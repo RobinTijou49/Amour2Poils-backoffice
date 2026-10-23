@@ -1,15 +1,16 @@
 import "server-only";
-import { connection } from "next/server";
+import { getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { utcDay } from "@/lib/format";
 
 // Lectures pour les écrans du back-office.
-// `connection()` : ces données changent à chaque requête, on les exclut du prérendu (cacheComponents).
+// Chaque fonction vérifie d'abord la session (Data Access Layer) : aucune donnée sans utilisateur connecté.
+// La lecture du cookie rend aussi la requête dynamique (exclue du prérendu avec cacheComponents).
 
 const ACTIVE = ["CONFIRMED", "CHECKED_IN"] as const;
 
 export async function getDashboard() {
-  await connection();
+  await getCurrentUser();
   const today = utcDay(new Date());
   const tomorrow = utcDay(today, 1);
   const in30 = utcDay(today, 30);
@@ -48,7 +49,7 @@ export async function getDashboard() {
 }
 
 export async function getWeekPlanning(weekStart: Date) {
-  await connection();
+  await getCurrentUser();
   const weekEnd = utcDay(weekStart, 7);
   const [kennels, pending] = await Promise.all([
     prisma.kennel.findMany({
@@ -72,7 +73,7 @@ export async function getWeekPlanning(weekStart: Date) {
 }
 
 export async function getDogs() {
-  await connection();
+  await getCurrentUser();
   return prisma.dog.findMany({
     orderBy: { name: "asc" },
     include: {
@@ -84,7 +85,7 @@ export async function getDogs() {
 }
 
 export async function getDog(id: string) {
-  await connection();
+  await getCurrentUser();
   return prisma.dog.findUnique({
     where: { id },
     include: {
@@ -96,7 +97,7 @@ export async function getDog(id: string) {
 }
 
 export async function getProducts() {
-  await connection();
+  await getCurrentUser();
   const weekAgo = utcDay(new Date(), -7);
   const [products, outThisWeek] = await Promise.all([
     prisma.product.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] }),
@@ -106,7 +107,7 @@ export async function getProducts() {
 }
 
 export async function getInvoices() {
-  await connection();
+  await requireRole("ADMIN");
   const invoices = await prisma.invoice.findMany({ include: { owner: true, lines: true }, orderBy: { number: "desc" } });
   return {
     today: utcDay(new Date()),
@@ -115,7 +116,7 @@ export async function getInvoices() {
 }
 
 export async function getSessions(weekStart: Date) {
-  await connection();
+  await getCurrentUser();
   return prisma.trainingSession.findMany({
     where: { startsAt: { gte: weekStart, lt: utcDay(weekStart, 7) } },
     include: { enrollments: { include: { dog: true } } },

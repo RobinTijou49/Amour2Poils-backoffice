@@ -26,6 +26,28 @@ model User {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   stockMovements StockMovement[]
+  sessions       Session[]
+}
+
+// Session de connexion. `id` = empreinte SHA-256 du jeton du cookie :
+// une fuite de la base ne donne pas de jeton utilisable.
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Échecs de connexion, pour limiter les essais (anti force brute).
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
 }
 
 // ───────────── Clients et chiens ─────────────

@@ -9,6 +9,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 | 2026-10-22 | Initialisation du projet | Next.js + Bun, Docker Postgres, schéma Prisma, seed, README, CLAUDE.md | À relire : schéma de données, choix des statuts |
 | 2026-10-23 | Maquette Figma (serveur MCP Figma) | Variables, styles, 7 composants, 7 écrans desktop, 3 écrans mobiles | Contrastes recalculés ; défauts corrigés après capture : texte d'erreur rogné, boutons tronqués, avatars écrasés, onglet actif indiqué par la couleur seule. À relire : contenu des écrans |
 
+| 2026-10-23 | Coder la maquette en Next.js | Composants UI, layout, 7 pages branchées sur Prisma, seed enrichi | Build cassé par `usePathname` hors `<Suspense>` sur la route dynamique (corrigé) ; « chiens présents » comptait les arrivées non enregistrées (corrigé) |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

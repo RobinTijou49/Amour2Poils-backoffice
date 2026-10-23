@@ -119,14 +119,46 @@ async function main() {
   });
   await prisma.enrollment.create({ data: { sessionId: puppy.id, dogId: nala.id } });
 
-  await prisma.invoice.create({
+  const julien = await prisma.owner.create({
     data: {
-      number: "F-2026-0001", status: "SENT", ownerId: camille.id, dueAt: day(14),
-      lines: { create: { label: "Pension Rex (5 nuits)", quantity: 5, unitPriceCents: 2500, bookingId: rexStay.id } },
+      firstName: "Julien", lastName: "Petit", email: "julien.petit@example.com", phone: "06 55 44 33 22",
+      dogs: { create: { name: "Oslo", breed: "Husky", sex: "MALE", birthDate: new Date("2022-01-15"), weightKg: 22, vaccinations: { create: [{ name: "CHPPiL", administeredAt: day(-90), expiresAt: day(275) }] } } },
     },
+    include: { dogs: true },
   });
+  const ines = await prisma.owner.create({
+    data: {
+      firstName: "Inès", lastName: "Bernard", phone: "06 77 88 99 00",
+      dogs: { create: { name: "Pepper", breed: "Jack Russell", sex: "FEMALE", birthDate: new Date("2020-06-02"), weightKg: 6.5 } },
+    },
+    include: { dogs: true },
+  });
+  const [oslo] = julien.dogs;
+  const [pepper] = ines.dogs;
+  await prisma.booking.create({ data: { dogId: oslo.id, kennelId: kennels[5].id, startDate: day(0), endDate: day(2), status: "CONFIRMED", nightlyRateCents: 2500 } });
+  await prisma.booking.create({ data: { dogId: pepper.id, kennelId: kennels[0].id, startDate: day(-6), endDate: day(-3), status: "COMPLETED", nightlyRateCents: 2000, checkedInAt: day(-6), checkedOutAt: day(-3) } });
 
-  console.log("Seed terminé : 1 admin, 6 boxes, 3 clients, 3 chiens, 3 réservations, 4 produits, 1 séance, 1 facture.");
+  const at = (offset: number, hour: number, minute = 0) => new Date(day(offset).getTime() + (hour * 60 + minute) * 60_000);
+  const priv = await prisma.trainingSession.create({ data: { type: "PRIVATE", title: "Rappel en extérieur", startsAt: at(0, 8), durationMin: 60, capacity: 1, priceCents: 4000, location: "Parc Balzac" } });
+  await prisma.enrollment.create({ data: { sessionId: priv.id, dogId: milo.id } });
+  const group = await prisma.trainingSession.create({ data: { type: "GROUP", title: "Marche en laisse", startsAt: at(4, 9, 30), durationMin: 60, capacity: 2, priceCents: 1500, location: "Terrain de la pension" } });
+  await prisma.enrollment.createMany({ data: [{ sessionId: group.id, dogId: rex.id }, { sessionId: group.id, dogId: oslo.id }] });
+  await prisma.trainingSession.create({ data: { type: "PETSITTING", title: "Visite chez Inès Bernard", startsAt: at(1, 12, 30), durationMin: 30, capacity: 1, priceCents: 1800, location: "Angers centre" } });
+
+  const invoice = (number: string, ownerId: string, status: "DRAFT" | "SENT" | "PAID", issued: number, due: number | null, label: string, quantity: number, unitPriceCents: number, bookingId?: string) =>
+    prisma.invoice.create({
+      data: {
+        number, status, ownerId, issuedAt: day(issued), dueAt: due === null ? null : day(due), paidAt: status === "PAID" ? day(issued + 3) : null,
+        lines: { create: { label, quantity, unitPriceCents, bookingId } },
+      },
+    });
+  await invoice("F-2026-0001", camille.id, "PAID", -80, -66, "Pension Rex (7 nuits)", 7, 2500);
+  await invoice("F-2026-0002", julien.id, "SENT", -21, -7, "Cours particulier", 1, 4000);
+  await invoice("F-2026-0003", lucas.id, "PAID", -5, 9, "Puppy class (3 séances)", 3, 1800);
+  await invoice("F-2026-0004", ines.id, "SENT", -3, 4, "Pension Pepper (3 nuits)", 3, 2000);
+  await invoice("F-2026-0005", camille.id, "DRAFT", 0, null, "Pension Rex (5 nuits)", 5, 2500, rexStay.id);
+
+  console.log("Seed terminé : 1 admin, 6 boxes, 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures.");
 }
 
 main()

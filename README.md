@@ -119,6 +119,23 @@ Maquette : <https://www.figma.com/design/2ju0WFXMpBtETVELEKz6Ee>
 - **Limites du plan Figma gratuit** : 3 pages maximum et un seul mode par collection de variables.
   Le thème sombre est donc une seconde collection « Couleurs · Sombre » au lieu d'un mode.
 
+### De la maquette au code
+
+| Route | Écran |
+|---|---|
+| `/` | Tableau de bord |
+| `/reservations?semaine=AAAA-MM-JJ` | Planning des boxes |
+| `/chiens`, `/chiens/[id]` | Liste et fiche chien |
+| `/stock`, `/facturation`, `/seances` | Stock, factures, séances |
+| `/connexion` | Connexion (visuel, l'authentification arrive ensuite) |
+
+- Composants dans [`src/components/ui`](src/components/ui), un par composant Figma (Bouton, Champ, Badge, Carte, Tableau, Icônes).
+- Coquille commune dans le route group [`src/app/(backoffice)`](src/app/(backoffice)/layout.tsx) : lien
+  « Aller au contenu », barre latérale sur desktop, barre d'onglets en bas sur mobile, `aria-current="page"`.
+- Données lues avec Prisma dans des Server Components ([`src/lib/queries.ts`](src/lib/queries.ts)).
+  Avec `cacheComponents`, chaque requête appelle `connection()` et s'affiche dans un `<Suspense>` :
+  la coquille est prérendue, les données sont streamées (*Partial Prerendering*).
+
 ---
 
 ## Lancer le projet

@@ -1,25 +1,33 @@
-// Service worker du back-office. Écrit à la main (une cinquantaine de lignes) pour pouvoir le relire en entier.
+// Service worker du back-office. Écrit à la main (une soixantaine de lignes) pour pouvoir le relire en entier.
 //
 // Stratégies :
-//  - fichiers statiques de Next (/_next/static, icônes) : cache d'abord, ils sont versionnés par leur nom ;
+//  - fichiers statiques de Next (/_next/static, icônes) : cache d'abord, ils sont versionnés par leur nom
+//    (ceux de /offline sont préchargés à l'installation) ;
 //  - navigations : réseau d'abord ; hors connexion, page /offline. On ne met JAMAIS en cache les pages
 //    du back-office : elles contiennent des données de clients et resteraient lisibles après déconnexion.
 //  - tout le reste (API, Server Actions, POST) : jamais intercepté.
-// Les données consultables hors ligne (planning, fiches chiens) passeront par IndexedDB (tâche suivante).
+// Les données consultables hors ligne (planning, fiches chiens) sont lues dans IndexedDB par la page /offline.
 
-const VERSION = "v1";
+const VERSION = "v3";
 const STATIC_CACHE = `a2p-static-${VERSION}`;
 const SHELL_CACHE = `a2p-shell-${VERSION}`;
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(SHELL_CACHE)
-      .then((cache) => cache.addAll([OFFLINE_URL, "/icons/icon-192.png"]))
-      .then(() => self.skipWaiting()),
-  );
+  event.waitUntil(precache().then(() => self.skipWaiting()));
 });
+
+// La page /offline lit IndexedDB avec du JavaScript : on met aussi en cache les fichiers /_next/static
+// qu'elle référence (sinon elle s'afficherait hors connexion, mais sans pouvoir s'exécuter).
+async function precache() {
+  const shell = await caches.open(SHELL_CACHE);
+  // cache: "reload" : on ignore le cache HTTP du navigateur, sinon on pourrait précacher une ancienne version.
+  await shell.addAll([OFFLINE_URL, "/icons/icon-192.png"].map((url) => new Request(url, { cache: "reload" })));
+  const html = await (await shell.match(OFFLINE_URL)).text();
+  const assets = [...new Set(html.match(/\/_next\/static\/[^"'\s\)]+/g) ?? [])];
+  const statics = await caches.open(STATIC_CACHE);
+  await Promise.all(assets.map((a) => statics.add(a).catch(() => undefined)));
+}
 
 self.addEventListener("activate", (event) => {
   // Supprime les caches des anciennes versions.

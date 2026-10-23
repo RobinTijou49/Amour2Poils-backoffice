@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClearOfflineData } from "@/components/offline-sync";
 import { Icon } from "@/components/ui/icons";
 import { LoginForm } from "./login-form";
 
@@ -7,6 +8,7 @@ export const metadata: Metadata = { title: "Connexion" };
 export default function LoginPage() {
   return (
     <div className="grid min-h-full flex-1 grid-cols-1 md:grid-cols-[1fr_640px]">
+      <ClearOfflineData />
       <section className="hidden flex-col justify-center gap-6 bg-sage-soft px-20 md:flex">
         <Icon name="patte" size={60} className="text-primary" />
         <p className="text-xs font-bold tracking-wider text-primary uppercase">Amour 2 Poils</p>

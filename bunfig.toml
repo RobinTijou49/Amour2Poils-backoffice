@@ -1,0 +1,3 @@
+# Configuration de `bun test` (tests unitaires, voir tests/setup.ts).
+[test]
+preload = ["./tests/setup.ts"]

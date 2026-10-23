@@ -5,16 +5,12 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
-import { fieldErrors, formValues, isUniqueViolation, optional, type FormState } from "@/lib/forms";
+import { fieldErrors, formValues, isoDay, isUniqueViolation, optional, type FormState } from "@/lib/forms";
 import { prisma } from "@/lib/prisma";
 
 // Actions d'écriture des fiches clients et chiens. Même patron que les réservations :
 // session → validation Zod → règles (unicité…) → écriture → redirection ou rafraîchissement.
 
-const isoDay = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide.")
-  .transform((s) => new Date(`${s}T00:00:00Z`));
 const optionalDay = z.union([z.literal(""), isoDay]).optional().transform((v) => (v instanceof Date ? v : null));
 
 const ownerInput = z.object({

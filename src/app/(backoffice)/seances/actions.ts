@@ -4,8 +4,8 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
-import { de, parisToUtc } from "@/lib/format";
-import { fieldErrors, formValues, isUniqueViolation, optional, type FormState } from "@/lib/forms";
+import { de, eurosToCents, parisToUtc } from "@/lib/format";
+import { fieldErrors, formValues, isRealDay, isUniqueViolation, optional, type FormState } from "@/lib/forms";
 import { prisma } from "@/lib/prisma";
 
 // Actions des séances d'éducation et de petsitting.
@@ -13,7 +13,7 @@ import { prisma } from "@/lib/prisma";
 const sessionInput = z.object({
   type: z.enum(["PRIVATE", "GROUP", "PUPPY_CLASS", "PETSITTING"], { message: "Choisissez le type de séance." }),
   title: z.string().trim().min(1, "Saisissez un titre.").max(100),
-  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide."),
+  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide.").refine(isRealDay, "Date invalide."),
   time: z.string().regex(/^\d{2}:\d{2}$/, "Heure invalide."),
   durationMin: z.coerce.number({ message: "Saisissez une durée." }).int().min(15, "Au moins 15 minutes.").max(480, "8 heures maximum."),
   capacity: z.coerce.number({ message: "Saisissez le nombre de places." }).int().min(1, "Au moins 1 place.").max(30),
@@ -36,7 +36,7 @@ export async function createSession(_prev: FormState, formData: FormData): Promi
       startsAt,
       durationMin: s.durationMin,
       capacity: s.type === "PETSITTING" ? 1 : s.capacity,
-      priceCents: Math.round(s.price * 100),
+      priceCents: eurosToCents(s.price),
       location: optional(s.location),
     },
   });

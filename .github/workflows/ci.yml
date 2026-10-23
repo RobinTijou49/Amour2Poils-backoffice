@@ -32,7 +32,9 @@ jobs:
         run: bun audit --audit-level=high --ignore GHSA-vfj7-8cjw-p6xm
       - run: bun run lint
       - run: bun run typecheck
-      # Les tests unitaires, d'intégration et E2E seront ajoutés ici (phase 3).
+      - name: Tests unitaires
+        run: bun test
+      # Les tests d'intégration et E2E s'ajouteront ici (phase 3).
       - run: bun run build
       - name: Aucun secret dans le code envoyé au navigateur
         run: |

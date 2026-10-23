@@ -14,10 +14,16 @@ export const movementInput = z.object({
 export type MovementInput = z.output<typeof movementInput>;
 
 /** Nouvelle quantité après un mouvement. Un ajustement fixe la quantité comptée (inventaire). */
-function nextQuantity(current: number, type: MovementInput["type"], quantity: number) {
+export function nextQuantity(current: number, type: MovementInput["type"], quantity: number) {
   if (type === "IN") return current + quantity;
   if (type === "OUT") return current - quantity;
   return quantity;
+}
+
+/** Une alerte « stock bas » part seulement quand le stock PASSE sous le seuil (ou tombe pile dessus) :
+ *  pas à chaque mouvement tant qu'il reste bas, pas non plus quand il remonte. */
+export function crossesAlertThreshold(before: number, after: number, threshold: number) {
+  return before > threshold && after <= threshold;
 }
 
 /** Transaction : le mouvement et la nouvelle quantité sont enregistrés ensemble, ou pas du tout. */
@@ -31,8 +37,7 @@ export async function applyMovement(m: MovementInput, userId: string, reason: st
     await tx.product.update({ where: { id: product.id }, data: { quantity } });
     return { ok: true, product, quantity } as const;
   });
-  // Une seule alerte au franchissement du seuil (pas à chaque mouvement tant que le stock reste bas).
-  if (result.ok && result.product.quantity > result.product.alertThreshold && result.quantity <= result.product.alertThreshold) {
+  if (result.ok && crossesAlertThreshold(result.product.quantity, result.quantity, result.product.alertThreshold)) {
     notify({
       title: "Stock bas",
       body: `${result.product.name} : ${result.quantity} ${result.product.unit} restant(s) (seuil ${result.product.alertThreshold}).`,

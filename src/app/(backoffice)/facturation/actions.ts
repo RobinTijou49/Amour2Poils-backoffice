@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { InvoiceStatus } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { nights } from "@/lib/bookings";
-import { formatDate, utcDay } from "@/lib/format";
+import { eurosToCents, formatDate, utcDay } from "@/lib/format";
 import { fieldErrors, formValues, type FormState } from "@/lib/forms";
 import { canSetInvoiceStatus, DRAFT_PREFIX, isProvisionalNumber, nextInvoiceNumber } from "@/lib/invoices";
 import { prisma } from "@/lib/prisma";
@@ -97,7 +97,7 @@ export async function addLine(_prev: FormState, formData: FormData): Promise<For
   const l = parsed.data;
   const invoice = await prisma.invoice.findUnique({ where: { id: l.invoiceId } });
   if (invoice?.status !== "DRAFT") return { error: "Seul un brouillon peut être modifié." };
-  await prisma.invoiceLine.create({ data: { invoiceId: l.invoiceId, label: l.label, quantity: l.quantity, unitPriceCents: Math.round(l.unitPrice * 100) } });
+  await prisma.invoiceLine.create({ data: { invoiceId: l.invoiceId, label: l.label, quantity: l.quantity, unitPriceCents: eurosToCents(l.unitPrice) } });
   refresh();
   return { success: "Ligne ajoutée." };
 }

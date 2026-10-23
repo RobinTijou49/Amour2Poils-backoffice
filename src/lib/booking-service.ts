@@ -1,13 +1,13 @@
 import "server-only";
 import { z } from "zod";
 import { hasRoom } from "@/lib/bookings";
-import { utcDay } from "@/lib/format";
+import { eurosToCents, utcDay } from "@/lib/format";
+import { isoDay } from "@/lib/forms";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/push";
 
 // Règles d'écriture des réservations partagées par les Server Actions (formulaires) et les Route Handlers (API).
 
-const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide.").transform((s) => new Date(`${s}T00:00:00Z`));
 
 export const bookingInput = z
   .object({
@@ -45,7 +45,7 @@ export async function createBookingRecord(d: z.output<typeof bookingInput>) {
       kennelId: d.kennelId,
       startDate: d.startDate,
       endDate: d.endDate,
-      nightlyRateCents: Math.round(d.nightlyRate * 100),
+      nightlyRateCents: eurosToCents(d.nightlyRate),
       notes: d.notes || null,
       status: d.kennelId ? "CONFIRMED" : "PENDING",
     },

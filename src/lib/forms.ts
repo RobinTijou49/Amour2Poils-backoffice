@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 
 // Utilitaires partagés par les Server Actions de formulaire.
@@ -27,3 +27,17 @@ export function isUniqueViolation(e: unknown) {
 
 /** Champ texte facultatif : "" devient null. */
 export const optional = (v: string | undefined) => (v && v.trim() ? v.trim() : null);
+
+/** « AAAA-MM-JJ » désigne-t-il un vrai jour du calendrier ? `new Date("2027-02-30")` ne refuse pas : sous Bun il donne le
+ *  2 mars (le séjour serait décalé sans erreur), sous Node une date invalide. On compare donc à la date reconstruite. */
+export function isRealDay(value: string) {
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+/** Date « jour » saisie dans un formulaire : texte AAAA-MM-JJ d'un jour existant, converti en minuit UTC. */
+export const isoDay = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide.")
+  .refine(isRealDay, "Date invalide.")
+  .transform((s) => new Date(`${s}T00:00:00Z`));

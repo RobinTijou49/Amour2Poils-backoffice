@@ -1,0 +1,4 @@
+# Les scripts shell et le Dockerfile doivent garder des fins de ligne Unix (ils tournent sous Linux).
+*.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf

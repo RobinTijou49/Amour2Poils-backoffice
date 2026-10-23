@@ -21,6 +21,23 @@ env:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # Base PostgreSQL jetable pour les tests d'intégration (les tests refusent toute base dont le nom ne finit pas par _test).
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: amour2poils_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d amour2poils_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/amour2poils_test?schema=public
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -33,8 +50,14 @@ jobs:
       - run: bun run lint
       - run: bun run typecheck
       - name: Tests unitaires
-        run: bun test
-      # Les tests d'intégration et E2E s'ajouteront ici (phase 3).
+        run: bun run test
+      - name: Préparer la base de test (migrations)
+        run: bun run test:db
+      - name: Tests d'intégration (Route Handlers, Server Actions, concurrence)
+        run: bun run test:int
+      - name: Tests de composants (Testing Library)
+        run: bun run test:components
+      # Les tests E2E (Playwright) s'ajouteront ici (tst-08).
       - run: bun run build
       - name: Aucun secret dans le code envoyé au navigateur
         run: |

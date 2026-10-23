@@ -10,7 +10,7 @@ import type { OfflineSnapshot } from "@/lib/offline/types";
  */
 export async function GET(request: Request) {
   const g = await guard(request);
-  if ("response" in g) return g.response;
+  if (!g.ok) return g.response;
   const today = utcDay(new Date());
   const bookings = await prisma.booking.findMany({
     where: { status: { in: ["CONFIRMED", "CHECKED_IN"] }, startDate: { lte: utcDay(today, 1) }, endDate: { gte: today } },

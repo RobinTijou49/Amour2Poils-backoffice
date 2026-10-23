@@ -67,7 +67,7 @@ describe("isSameOrigin : contrôle anti-CSRF des écritures", () => {
 describe("guard : porte d'entrée de chaque Route Handler", () => {
   const status = async (r: ReturnType<typeof guard>) => {
     const out = await r;
-    return out.response ? out.response.status : "ok";
+    return out.ok ? "ok" : out.response.status;
   };
 
   test("lecture sans session : 401", async () => {
@@ -98,7 +98,7 @@ describe("guard : porte d'entrée de chaque Route Handler", () => {
   test("écriture JSON avec session : passe, et renvoie l'utilisateur", async () => {
     session = { user: { id: "u1", role: "EMPLOYEE" } };
     const out = await guard(req({ ...JSON_TYPE, "content-type": "Application/JSON; charset=utf-8" }), { write: true });
-    expect(out.user?.id).toBe("u1");
+    expect(out.ok && out.user.id).toBe("u1");
   });
 
   test("route réservée à la gérance : employé 403, gérant accepté", async () => {

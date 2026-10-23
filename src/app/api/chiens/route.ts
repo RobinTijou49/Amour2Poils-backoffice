@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 /** GET /api/chiens?q=rex : recherche par nom de chien ou de propriétaire. */
 export async function GET(request: Request) {
   const g = await guard(request);
-  if ("response" in g) return g.response;
+  if (!g.ok) return g.response;
   const q = new URL(request.url).searchParams.get("q")?.trim().slice(0, 80);
   const contains = (field: string) => ({ [field]: { contains: q, mode: "insensitive" as const } });
   const dogs = await prisma.dog.findMany({

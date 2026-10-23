@@ -4,7 +4,7 @@ import { applyMovement, movementInput } from "@/lib/stock-service";
 /** POST /api/stock/:id/mouvements  { type: "IN" | "OUT" | "ADJUSTMENT", quantity, reason? } */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const g = await guard(request, { write: true });
-  if ("response" in g) return g.response;
+  if (!g.ok) return g.response;
   const raw = await readJson(request);
   const parsed = movementInput.safeParse(typeof raw === "object" && raw ? { ...raw, productId: (await params).id } : null);
   if (!parsed.success) return apiError("Données invalides.", 422, zodDetails(parsed.error));

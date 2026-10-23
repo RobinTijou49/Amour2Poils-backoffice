@@ -51,18 +51,22 @@ export function zodDetails(error: z.ZodError) {
   return out;
 }
 
-/** Contrôles communs : origine (écritures), session, rôle facultatif. */
-export async function guard(request: Request, opts: { write?: boolean; admin?: boolean } = {}) {
+/** Résultat de guard() : soit la réponse d'erreur à renvoyer telle quelle, soit l'utilisateur autorisé. */
+export type GuardResult = { ok: false; response: Response } | { ok: true; user: NonNullable<Awaited<ReturnType<typeof apiUser>>> };
+const deny = (response: Response): GuardResult => ({ ok: false, response });
+
+/** Contrôles communs : origine (écritures), session, rôle facultatif. Usage : `const g = await guard(req); if (!g.ok) return g.response;` */
+export async function guard(request: Request, opts: { write?: boolean; admin?: boolean } = {}): Promise<GuardResult> {
   if (opts.write) {
-    if (!isSameOrigin(request)) return { response: apiError("Origine refusée.", 403) } as const;
+    if (!isSameOrigin(request)) return deny(apiError("Origine refusée.", 403));
     // Un formulaire HTML d'un autre site ne peut envoyer que du texte brut ou multipart, pas du JSON, sans
     // déclencher une vérification CORS préalable que notre API ne passe jamais : exiger du JSON ferme cette porte.
     if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
-      return { response: apiError("Content-Type application/json requis.", 415) } as const;
+      return deny(apiError("Content-Type application/json requis.", 415));
     }
   }
   const user = await apiUser();
-  if (!user) return { response: apiError("Authentification requise.", 401) } as const;
-  if (opts.admin && user.role !== "ADMIN") return { response: apiError("Réservé à la gérance.", 403) } as const;
-  return { user } as const;
+  if (!user) return deny(apiError("Authentification requise.", 401));
+  if (opts.admin && user.role !== "ADMIN") return deny(apiError("Réservé à la gérance.", 403));
+  return { ok: true, user };
 }

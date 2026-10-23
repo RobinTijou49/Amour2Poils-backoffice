@@ -52,6 +52,8 @@ export async function enrollDog(_prev: FormState, formData: FormData): Promise<F
   try {
     // Transaction : compter les places et inscrire sans qu'une autre inscription passe entre les deux.
     const result = await prisma.$transaction(async (tx) => {
+      // Verrou sur la séance : sinon deux inscriptions simultanées comptent les mêmes places libres et dépassent la capacité.
+      await tx.$queryRaw`SELECT id FROM "TrainingSession" WHERE id = ${sessionId} FOR UPDATE`;
       const session = await tx.trainingSession.findUnique({ where: { id: sessionId }, include: { _count: { select: { enrollments: true } } } });
       if (!session) return { error: "Séance introuvable." } satisfies FormState;
       if (session._count.enrollments >= session.capacity) return { error: `Séance complète (${session.capacity} place${session.capacity > 1 ? "s" : ""}).` } satisfies FormState;

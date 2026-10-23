@@ -124,6 +124,9 @@ export async function setInvoiceStatus(_prev: FormState, formData: FormData): Pr
 
   // Transaction : lecture du dernier numéro et attribution du suivant sans qu'un autre envoi s'intercale.
   const result = await prisma.$transaction(async (tx) => {
+    // Verrou consultatif (libéré à la fin de la transaction) : deux envois simultanés liraient le même dernier numéro et
+    // viseraient le même suivant. L'un échouait sur la contrainte d'unicité ; ils passent maintenant l'un après l'autre.
+    if (to.data === "SENT") await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('invoice-number'))`;
     const invoice = await tx.invoice.findUnique({ where: { id }, include: { lines: true } });
     if (!invoice) return { error: "Facture introuvable." };
     if (!canSetInvoiceStatus(invoice.status, to.data)) return { error: "Cette action n'est plus possible pour cette facture." };

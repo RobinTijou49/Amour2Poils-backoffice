@@ -19,8 +19,9 @@ const WINDOW_MS = 15 * 60 * 1000;
 const dummyHash = Bun.password.hash("mot-de-passe-factice");
 
 export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
-  const parsed = credentials.safeParse({ email: formData.get("email"), password: formData.get("password") });
+  // Nettoyage AVANT validation : un clavier de téléphone ajoute souvent une espace après l'adresse, que Zod refuserait.
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const parsed = credentials.safeParse({ email, password: formData.get("password") });
   if (!parsed.success) return { error: parsed.error.issues[0].message, email };
 
   const since = new Date(Date.now() - WINDOW_MS);

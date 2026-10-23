@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { BookingStatus } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
-import { bookingInput, createBookingRecord, kennelHasRoom } from "@/lib/booking-service";
+import { bookingInput, confirmInKennel, createBookingRecord } from "@/lib/booking-service";
 import { canTransition } from "@/lib/bookings";
 import { de } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -25,10 +25,10 @@ export async function createBooking(_prev: FormState, formData: FormData): Promi
     return { error: "Corrigez les champs signalés.", fieldErrors, values };
   }
   const d = parsed.data;
-  if (d.kennelId && !(await kennelHasRoom(d.kennelId, d.startDate, d.endDate))) {
+  const booking = await createBookingRecord(d);
+  if (!booking) {
     return { error: "Cette box est complète sur ces dates.", fieldErrors: { kennelId: "Box complète sur ces dates : choisissez-en une autre ou laissez « à attribuer »." }, values };
   }
-  const booking = await createBookingRecord(d);
   redirect(`/reservations/${booking.id}`);
 }
 
@@ -50,10 +50,9 @@ export async function confirmBooking(_prev: FormState, formData: FormData): Prom
   if ("error" in r) return { error: r.error };
   const kennelId = String(formData.get("kennelId") ?? "");
   if (!kennelId) return { error: "Choisissez une box.", fieldErrors: { kennelId: "Choisissez une box." } };
-  if (!(await kennelHasRoom(kennelId, r.booking.startDate, r.booking.endDate, r.booking.id))) {
+  if (!(await confirmInKennel(r.booking, kennelId))) {
     return { error: "Cette box est complète sur ces dates.", fieldErrors: { kennelId: "Box complète sur ces dates." } };
   }
-  await prisma.booking.update({ where: { id: r.booking.id }, data: { status: "CONFIRMED", kennelId } });
   refresh();
   return { success: `Réservation ${de(r.booking.dog.name)} confirmée.` };
 }

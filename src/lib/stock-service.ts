@@ -29,6 +29,9 @@ export function crossesAlertThreshold(before: number, after: number, threshold: 
 /** Transaction : le mouvement et la nouvelle quantité sont enregistrés ensemble, ou pas du tout. */
 export async function applyMovement(m: MovementInput, userId: string, reason: string | null) {
   const result = await prisma.$transaction(async (tx) => {
+    // Verrou sur la ligne du produit jusqu'à la fin de la transaction : « lire la quantité, calculer, écrire » est sinon
+    // une course (deux sorties simultanées lisent le même stock et l'une écrase l'autre : stock vendu deux fois).
+    await tx.$queryRaw`SELECT id FROM "Product" WHERE id = ${m.productId} FOR UPDATE`;
     const product = await tx.product.findUnique({ where: { id: m.productId } });
     if (!product) return { ok: false, error: "Produit introuvable." } as const;
     const quantity = nextQuantity(product.quantity, m.type, m.quantity);

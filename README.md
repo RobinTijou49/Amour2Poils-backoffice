@@ -133,8 +133,10 @@ Maquette : <https://www.figma.com/design/2ju0WFXMpBtETVELEKz6Ee>
 - Coquille commune dans le route group [`src/app/(backoffice)`](src/app/(backoffice)/layout.tsx) : lien
   « Aller au contenu », barre latérale sur desktop, barre d'onglets en bas sur mobile, `aria-current="page"`.
 - Données lues avec Prisma dans des Server Components ([`src/lib/queries.ts`](src/lib/queries.ts)).
-  Avec `cacheComponents`, chaque requête appelle `connection()` et s'affiche dans un `<Suspense>` :
-  la coquille est prérendue, les données sont streamées (*Partial Prerendering*).
+  Chaque requête appelle `connection()` et s'affiche dans un `<Suspense>` : la coquille est streamée, puis les données.
+  `cacheComponents` (prérendu partiel) a été **désactivé en phase Sécurité** : une page prérendue au build n'a pas de
+  nonce, donc ses scripts seraient bloqués par une CSP stricte. Le layout racine appelle `connection()` : toutes les pages
+  sont rendues à la demande, ce qui permet à Next d'ajouter le nonce de `src/proxy.ts` à chaque `<script>`.
 
 ### Réservations : cycle de vie
 

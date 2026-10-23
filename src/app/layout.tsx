@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
 import { Nunito, Quicksand } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import "./globals.css";
@@ -33,7 +34,10 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Rendu à la demande pour toutes les pages : sans cela, une page prérendue au build n'aurait pas de nonce CSP
+  // (src/proxy.ts) et ses scripts seraient bloqués.
+  await connection();
   return (
     <html lang="fr" className={`${quicksand.variable} ${nunito.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}

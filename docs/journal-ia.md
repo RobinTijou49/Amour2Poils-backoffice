@@ -29,6 +29,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | docker-compose de production (prod-02) | `docker-compose.prod.yml` (db, migrate one-shot, app, Caddy sur 8082), `Caddyfile`, `.env.production.example`, rotation des logs | Testé en local : migrations puis app saine puis Caddy, `/api/health` et `sw.js` via :8082, seul 8082 exposé (la base n'a aucun port hôte). **`.gitignore` (`.env*`) ignorait aussi `.env.production.example`** : exception ajoutée. Sans domaine, pas de HTTPS : service worker, installation PWA et push inutilisables sur `http://IP:8082` |
 
+| 2026-10-23 | Pipeline CI/CD (prod-03) | `.github/workflows/ci.yml` : `check` (lint, typecheck, build), `images` (GHCR : application et migration, tags `latest` et SHA), `deploy` (SSH : copie du compose, `docker login` par jeton de job via stdin, `pull`, `up -d`, contrôle de `/api/health` sur 8082) | Validé avec **actionlint** (un avertissement shellcheck corrigé ; clé privée passée par variable d'environnement et non insérée dans le script). **Pas encore exécuté sur GitHub** : à vérifier au premier push, secrets `SSH_HOST`, `SSH_USER`, `SSH_KEY` à créer. `ssh-keyscan` fait confiance à la première connexion (une empreinte fixée dans un secret serait plus sûre). Étape de tests à brancher en phase 3 |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

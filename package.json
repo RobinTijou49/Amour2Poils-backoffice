@@ -13,6 +13,8 @@
     "test:db": "bun tests/db-setup.ts",
     "test:int": "bun test --preload ./tests/integration/setup.ts tests/integration",
     "test:components": "bun test --preload ./tests/components/setup.ts tests/components",
+    "test:e2e": "bun run build && playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "test:all": "bun run test && bun run test:db && bun run test:int && bun run test:components",
     "postinstall": "bun --bun prisma generate",
     "db:up": "docker compose up -d --wait",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",

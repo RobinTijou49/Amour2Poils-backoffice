@@ -269,14 +269,15 @@ Détail et décisions dans [docs/journal-ia.md](docs/journal-ia.md) ; audit des 
 
 ## Tests
 
-Trois suites, trois commandes, toutes branchées en CI (`.github/workflows/ci.yml`). Total : 451 tests.
+Quatre suites, toutes branchées en CI (`.github/workflows/ci.yml`). Total : 517 tests.
 
 | Commande | Suite | Ce qu'elle exerce |
 |---|---|---|
 | `bun run test` | **Unitaires** (`src/**/*.test.ts`, 221 tests, ~0,2 s) | Règles métier pures, schémas Zod, dates, sécurité (CSRF, CSP, garde d'API), synchronisation hors ligne. Aucune base. |
 | `bun run test:db` puis `bun run test:int` | **Intégration** (`tests/integration`, 164 tests, ~15 s) | Les vrais Route Handlers et Server Actions, branchés sur une **vraie base PostgreSQL de test** : droits, validation, transactions, notifications, **accès simultanés**. |
 | `bun run test:components` | **Composants** (`tests/components`, 66 tests) | Testing Library + happy-dom : étiquettes et annonces pour lecteurs d'écran, formulaires, bouton de notifications, page hors connexion. |
-| `bun run test:all` | Les trois | |
+| `bun run test:e2e` | **Bout en bout** (`tests/e2e`, 66 tests, ~2 min) | Un vrai **Chromium** (Playwright) pilote la construction de production sur une base dédiée `amour2poils_e2e_test` : connexion, rôles, réservation, accueil, stock, facture, **mode hors connexion avec service worker**, CSP. Premier lancement : `bunx playwright install chromium`. Rapport : `bunx playwright show-report`. |
+| `bun run test:all` | Unitaires, intégration et composants (pas le E2E, plus lent) | |
 
 **Base de test** : `amour2poils_test`, sur le même serveur Postgres que le développement (`bun run db:up`), créée et migrée par
 `bun run test:db`. Garde-fou : les tests vident les tables, donc ils **refusent** toute base dont le nom ne finit pas par `_test`.
@@ -285,6 +286,8 @@ En CI, un conteneur PostgreSQL jetable remplace le serveur local (`TEST_DATABASE
 **Ce qui est réel, ce qui est simulé** (`tests/integration/setup.ts`) : la base, Prisma, les sessions (ligne en base + jeton haché),
 Zod, les règles métier sont réels. Sont remplacés : les cookies de Next (`next/headers`), le rafraîchissement de page
 (`next/cache`) et l'envoi de notifications push (enregistré au lieu d'être envoyé).
+
+**E2E : ce qui n'est pas couvert** : les notifications push (l'abonnement exige de joindre le service de Google, fragile en test automatisé ; validé à la main sur Chrome et iPhone) et Safari/WebKit (Chromium seul).
 
 **Pourquoi des tests de concurrence** : ils lancent plusieurs requêtes en même temps sur la vraie base. Ils ont révélé que le stock,
 les places de séance, les boxes et la numérotation des factures reposaient sur « lire puis écrire » sans verrou (voir journal IA).

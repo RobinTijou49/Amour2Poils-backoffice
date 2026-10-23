@@ -14,3 +14,5 @@ Dockerfile
 .dockerignore
 tsconfig.tsbuildinfo
 npm-debug.log*
+playwright-report
+test-results

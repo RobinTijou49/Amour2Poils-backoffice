@@ -46,3 +46,8 @@ next-env.d.ts
 
 # Liens symboliques locaux vers .agents/skills (chemins propres à la machine)
 /.claude/skills/
+
+# Playwright (tests de bout en bout)
+/playwright-report/
+/test-results/
+/blob-report/

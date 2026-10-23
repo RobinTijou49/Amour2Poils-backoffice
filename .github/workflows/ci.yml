@@ -70,8 +70,47 @@ jobs:
             echo "::error::Un fichier .env figure dans .next/standalone"; exit 1
           fi
 
+  # Tests de bout en bout : un vrai navigateur (Chromium) pilote la construction de production sur une base jetable.
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # La base de test est créée par tests/e2e/global-setup.ts (son nom doit finir par _test).
+      E2E_DATABASE_URL: postgresql://ci:ci@localhost:5432/amour2poils_e2e_test?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Installer Chromium (avec ses dépendances système)
+        run: bunx playwright install --with-deps chromium
+      - run: bun run build
+      - name: Tests de bout en bout
+        run: bunx playwright test
+      - name: Rapport et traces (en cas d'échec)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-playwright
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
   images:
-    needs: check
+    needs: [check, e2e]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

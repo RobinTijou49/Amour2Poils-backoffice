@@ -4,6 +4,8 @@ import { NextResponse, type NextRequest } from "next/server";
 // La vraie vérification (session valide en base, rôle) se fait dans src/lib/auth.ts.
 export function proxy(request: NextRequest) {
   if (!request.cookies.has("a2p_session")) {
+    // Une API répond 401 en JSON : une redirection vers la page de connexion n'aurait pas de sens pour un client HTTP.
+    if (request.nextUrl.pathname.startsWith("/api/")) return Response.json({ error: "Authentification requise." }, { status: 401 });
     return NextResponse.redirect(new URL("/connexion", request.url));
   }
   return NextResponse.next();

@@ -5,41 +5,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { BookingStatus } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
-import { canTransition, hasRoom } from "@/lib/bookings";
-import { de, utcDay } from "@/lib/format";
+import { bookingInput, createBookingRecord, kennelHasRoom } from "@/lib/booking-service";
+import { canTransition } from "@/lib/bookings";
+import { de } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 // Actions d'écriture des réservations. Chacune : session → validation Zod → règle métier → écriture.
 
 export type FormState = { error?: string; success?: string; fieldErrors?: Record<string, string>; values?: Record<string, string> };
-
-const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide.").transform((s) => new Date(`${s}T00:00:00Z`));
-
-const bookingInput = z
-  .object({
-    dogId: z.string().min(1, "Choisissez un chien."),
-    kennelId: z.string().optional().transform((v) => v || null),
-    startDate: isoDay,
-    endDate: isoDay,
-    nightlyRate: z.coerce
-      .number({ message: "Saisissez un tarif." })
-      .positive("Le tarif doit être positif.")
-      .max(500, "Le tarif semble trop élevé."),
-    notes: z.string().max(500).optional(),
-  })
-  .refine((d) => d.endDate > d.startDate, { path: ["endDate"], message: "Le départ doit être après l'arrivée." })
-  .refine((d) => d.startDate >= utcDay(new Date()), { path: ["startDate"], message: "L'arrivée ne peut pas être dans le passé." });
-
-/** Vérifie la capacité d'une box sur toutes les nuits demandées. */
-async function kennelHasRoom(kennelId: string, start: Date, end: Date, excludeId?: string) {
-  const kennel = await prisma.kennel.findUnique({ where: { id: kennelId } });
-  if (!kennel || !kennel.active) return false;
-  const others = await prisma.booking.findMany({
-    where: { kennelId, id: excludeId ? { not: excludeId } : undefined, status: { in: ["CONFIRMED", "CHECKED_IN"] }, startDate: { lt: end }, endDate: { gt: start } },
-    select: { startDate: true, endDate: true },
-  });
-  return hasRoom(kennel.capacity, others.map((b) => ({ start: b.startDate, end: b.endDate })), { start, end });
-}
 
 export async function createBooking(_prev: FormState, formData: FormData): Promise<FormState> {
   await getCurrentUser();
@@ -55,17 +28,7 @@ export async function createBooking(_prev: FormState, formData: FormData): Promi
   if (d.kennelId && !(await kennelHasRoom(d.kennelId, d.startDate, d.endDate))) {
     return { error: "Cette box est complète sur ces dates.", fieldErrors: { kennelId: "Box complète sur ces dates : choisissez-en une autre ou laissez « à attribuer »." }, values };
   }
-  const booking = await prisma.booking.create({
-    data: {
-      dogId: d.dogId,
-      kennelId: d.kennelId,
-      startDate: d.startDate,
-      endDate: d.endDate,
-      nightlyRateCents: Math.round(d.nightlyRate * 100),
-      notes: d.notes || null,
-      status: d.kennelId ? "CONFIRMED" : "PENDING",
-    },
-  });
+  const booking = await createBookingRecord(d);
   redirect(`/reservations/${booking.id}`);
 }
 

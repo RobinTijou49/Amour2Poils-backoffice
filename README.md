@@ -231,6 +231,26 @@ Vérifier que l'API et la base répondent : <http://localhost:3000/api/health>
 | `db:seed` / `db:reset` | Remplit la base / la réinitialise |
 | `db:studio` | Interface Prisma Studio |
 
+## Déploiement (VPS, Docker, Caddy)
+
+L'application tourne dans trois conteneurs (`docker-compose.prod.yml`) : Caddy (seul port publié : **8082**, car 8080 est déjà pris sur le VPS), l'application Next.js (sous Bun) et PostgreSQL (volume persistant, aucun port exposé). Les images sont construites par GitHub Actions et publiées sur GHCR ; le déploiement part du pipeline (`.github/workflows/ci.yml`), jamais depuis un poste avec un mot de passe.
+
+**Mise en place (une seule fois)**
+
+1. Sur le poste : `deploy/vps-bootstrap.sh` et `.env.production` (généré en local, jamais commité) sont copiés sur le VPS, puis le script est lancé : il vérifie Docker et le port, crée `/opt/amour2poils`, installe `.env.production` (droits 600) et autorise la clé de déploiement.
+2. Dans GitHub (Settings, Secrets and variables, Actions) : `SSH_HOST`, `SSH_USER`, `SSH_KEY` (clé privée dédiée), et si besoin `SSH_PORT`. Créer l'environnement `production`.
+3. Un push sur `main` lance : lint, typecheck, build, publication des images, déploiement, contrôle de `/api/health`.
+4. Premier compte gérant (le seed efface tout, il n'est pas utilisable en production) :
+
+```bash
+cd /opt/amour2poils
+docker compose -f docker-compose.prod.yml --env-file .env.production run --rm   -e ADMIN_EMAIL=... -e ADMIN_NAME=... -e ADMIN_PASSWORD=... migrate bun prisma/create-admin.ts
+```
+
+**HTTPS** : sans nom de domaine, Caddy ne peut pas obtenir de certificat et sert en HTTP. Or l'installation de la PWA, le service worker et les notifications push exigent HTTPS (hors `localhost`). Dès qu'un domaine pointe sur le VPS : remplacer `:8082` par le domaine dans le `Caddyfile` et publier les ports 80 et 443.
+
+**Rappels de vaccins** : un cron du VPS appelle `POST /api/push/rappels-vaccins` avec `Authorization: Bearer $CRON_SECRET`.
+
 ## Structure
 
 ```

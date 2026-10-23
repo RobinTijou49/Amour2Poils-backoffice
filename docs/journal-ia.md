@@ -31,6 +31,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Pipeline CI/CD (prod-03) | `.github/workflows/ci.yml` : `check` (lint, typecheck, build), `images` (GHCR : application et migration, tags `latest` et SHA), `deploy` (SSH : copie du compose, `docker login` par jeton de job via stdin, `pull`, `up -d`, contrôle de `/api/health` sur 8082) | Validé avec **actionlint** (un avertissement shellcheck corrigé ; clé privée passée par variable d'environnement et non insérée dans le script). **Pas encore exécuté sur GitHub** : à vérifier au premier push, secrets `SSH_HOST`, `SSH_USER`, `SSH_KEY` à créer. `ssh-keyscan` fait confiance à la première connexion (une empreinte fixée dans un secret serait plus sûre). Étape de tests à brancher en phase 3 |
 
+| 2026-10-23 | Préparation du déploiement (prod-04) | Clé SSH dédiée `~/.ssh/amour2poils_deploy`, `.env.production` aux secrets générés (ignoré par Git), `deploy/vps-bootstrap.sh`, section Déploiement du README | **L'utilisateur a collé le mot de passe du VPS dans le chat et m'a demandé de m'y connecter** : refusé (je ne saisis pas de mot de passe pour m'authentifier) ; mot de passe à changer car exposé dans la conversation. Choix : déploiement par GitHub Actions avec clé dédiée, que l'utilisateur autorise lui-même. Script validé (`bash -n`), non exécuté sur le VPS |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

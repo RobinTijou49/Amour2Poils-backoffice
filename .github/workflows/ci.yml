@@ -39,7 +39,7 @@ jobs:
     env:
       TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/amour2poils_test?schema=public
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Audit des dépendances
@@ -96,7 +96,7 @@ jobs:
       E2E_DATABASE_URL: postgresql://ci:ci@postgres:5432/amour2poils_e2e_test?schema=public
       HOME: /root # Firefox/Chromium dans un conteneur : consigne Playwright
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # setup-bun a besoin de `unzip`, absent de l'image Playwright ; Node y est déjà : on installe Bun par npm,
       # à la version exacte du projet (champ packageManager de package.json).
       - name: Installer Bun
@@ -125,7 +125,7 @@ jobs:
     outputs:
       repo: ${{ steps.name.outputs.repo }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: name
         # GHCR n'accepte que des minuscules.
         run: echo "repo=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
@@ -174,7 +174,7 @@ jobs:
       # Dans le dossier personnel de l'utilisateur SSH : aucun droit root nécessaire.
       DEPLOY_DIR: amour2poils
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Vérifier les secrets
         run: |
           for v in SSH_HOST SSH_USER; do

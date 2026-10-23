@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { BookingStatus } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { canTransition, hasRoom } from "@/lib/bookings";
-import { utcDay } from "@/lib/format";
+import { de, utcDay } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 // Actions d'écriture des réservations. Chacune : session → validation Zod → règle métier → écriture.
@@ -92,7 +92,7 @@ export async function confirmBooking(_prev: FormState, formData: FormData): Prom
   }
   await prisma.booking.update({ where: { id: r.booking.id }, data: { status: "CONFIRMED", kennelId } });
   refresh();
-  return { success: `Réservation de ${r.booking.dog.name} confirmée.` };
+  return { success: `Réservation ${de(r.booking.dog.name)} confirmée.` };
 }
 
 export async function checkIn(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -101,7 +101,7 @@ export async function checkIn(_prev: FormState, formData: FormData): Promise<For
   if ("error" in r) return { error: r.error };
   await prisma.booking.update({ where: { id: r.booking.id }, data: { status: "CHECKED_IN", checkedInAt: new Date() } });
   refresh();
-  return { success: `Arrivée de ${r.booking.dog.name} enregistrée.` };
+  return { success: `Arrivée ${de(r.booking.dog.name)} enregistrée.` };
 }
 
 export async function checkOut(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -110,7 +110,7 @@ export async function checkOut(_prev: FormState, formData: FormData): Promise<Fo
   if ("error" in r) return { error: r.error };
   await prisma.booking.update({ where: { id: r.booking.id }, data: { status: "COMPLETED", checkedOutAt: new Date() } });
   refresh();
-  return { success: `Départ de ${r.booking.dog.name} enregistré.` };
+  return { success: `Départ ${de(r.booking.dog.name)} enregistré.` };
 }
 
 export async function cancelBooking(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -121,5 +121,5 @@ export async function cancelBooking(_prev: FormState, formData: FormData): Promi
   if ("error" in r) return { error: r.error };
   await prisma.booking.update({ where: { id: r.booking.id }, data: { status: "CANCELLED" } });
   refresh();
-  return { success: `Réservation de ${r.booking.dog.name} annulée.` };
+  return { success: `Réservation ${de(r.booking.dog.name)} annulée.` };
 }

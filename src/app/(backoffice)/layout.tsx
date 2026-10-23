@@ -17,7 +17,7 @@ export default function BackofficeLayout({ children }: LayoutProps<"/">) {
         Aller au contenu
       </a>
 
-      <aside className="sticky top-0 hidden h-dvh w-66 shrink-0 flex-col gap-6 border-r border-border bg-surface px-4 py-6 md:flex">
+      <aside className="sticky top-0 hidden print:hidden! h-dvh w-66 shrink-0 flex-col gap-6 border-r border-border bg-surface px-4 py-6 md:flex">
         <Link href="/" className={`flex items-center gap-2.5 rounded-sm px-3 ${focusRing}`}>
           <Icon name="patte" className="text-primary" />
           <span className="flex flex-col">
@@ -35,7 +35,7 @@ export default function BackofficeLayout({ children }: LayoutProps<"/">) {
         </Suspense>
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between border-b border-border bg-surface px-4 py-2 md:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 flex print:hidden items-center justify-between border-b border-border bg-surface px-4 py-2 md:hidden">
         <Link href="/" className={`flex items-center gap-2 rounded-sm font-heading font-bold ${focusRing}`}>
           <Icon name="patte" className="text-primary" />
           Amour 2 Poils
@@ -45,11 +45,11 @@ export default function BackofficeLayout({ children }: LayoutProps<"/">) {
         </Suspense>
       </header>
 
-      <main id="contenu" tabIndex={-1} className="flex min-w-0 flex-1 flex-col gap-6 px-4 pt-20 pb-28 outline-none md:px-8 md:py-8">
+      <main id="contenu" tabIndex={-1} className="flex min-w-0 flex-1 flex-col gap-6 px-4 pt-20 pb-28 outline-none md:px-8 md:py-8 print:p-0">
         {children}
       </main>
 
-      <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
+      <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 print:hidden border-t border-border bg-surface md:hidden">
         <Suspense fallback={<TabBarLinks pathname="" />}>
           <UserTabBar />
         </Suspense>

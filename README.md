@@ -171,6 +171,20 @@ stateDiagram-v2
   Création de produit réservée à la gérance.
 - Utilitaires partagés par toutes les actions : [`src/lib/forms.ts`](src/lib/forms.ts).
 
+### Facturation et séances
+
+- **Facture d'un séjour** : bouton « Créer la facture du séjour » sur le détail d'une réservation (gérance) ;
+  un séjour ne peut pas être facturé deux fois.
+- **Facture des séances** : bouton « Facturer » sur une séance ; regroupe toutes les séances non facturées
+  du client, sauf celles où le chien était noté absent.
+- **Cycle** : brouillon → envoyée → payée (ou annulée). Le numéro définitif `F-AAAA-NNNN` n'est attribué
+  qu'à l'envoi, dans une transaction : pas de trou dans la numérotation. Règles pures dans
+  [`src/lib/invoices.ts`](src/lib/invoices.ts).
+- **Impression / PDF** : la page `/facturation/[id]` masque la navigation à l'impression (`print:hidden`) ;
+  le navigateur l'enregistre en PDF, sans bibliothèque.
+- **Séances** : `/seances/nouvelle` (heure saisie à Paris, convertie en UTC en tenant compte de l'heure d'été),
+  `/seances/[id]` (inscriptions avec contrôle des places dans une transaction, présence notée après la séance).
+
 ### Authentification et rôles
 
 Sessions maison, sans bibliothèque, pour maîtriser et expliquer chaque mécanisme :

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, KpiCard, PageHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
-import { formatDate, formatTime } from "@/lib/format";
+import { de, formatDate, formatTime } from "@/lib/format";
 import { getProduct } from "@/lib/queries";
 import { productCategory } from "@/lib/status";
 import { MovementForm } from "../stock-forms";
@@ -52,7 +52,7 @@ async function Product({ params }: { params: PageProps<"/stock/[id]">["params"] 
         </Card>
         <Card title="Derniers mouvements">
           <DataTable
-            caption={`Derniers mouvements de ${product.name}`}
+            caption={`Derniers mouvements ${de(product.name)}`}
             rows={product.movements}
             rowKey={(m) => m.id}
             empty="Aucun mouvement enregistré."

@@ -1,5 +1,6 @@
 import "server-only";
 import { getCurrentUser, requireRole } from "@/lib/auth";
+import type { InvoiceStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { utcDay } from "@/lib/format";
 
@@ -110,9 +111,9 @@ export async function getProducts() {
   return { products, outThisWeek: outThisWeek._sum.quantity ?? 0 };
 }
 
-export async function getInvoices() {
+export async function getInvoices(status?: InvoiceStatus) {
   await requireRole("ADMIN");
-  const invoices = await prisma.invoice.findMany({ include: { owner: true, lines: true }, orderBy: { number: "desc" } });
+  const invoices = await prisma.invoice.findMany({ where: status ? { status } : undefined, include: { owner: true, lines: true }, orderBy: { issuedAt: "desc" } });
   return {
     today: utcDay(new Date()),
     invoices: invoices.map((inv) => ({ ...inv, totalCents: inv.lines.reduce((s, l) => s + l.quantity * l.unitPriceCents, 0) })),
@@ -140,7 +141,10 @@ export async function getBookingFormOptions() {
 export async function getBooking(id: string) {
   const user = await getCurrentUser();
   const [booking, kennels] = await Promise.all([
-    prisma.booking.findUnique({ where: { id }, include: { dog: { include: { owner: true } }, kennel: true } }),
+    prisma.booking.findUnique({
+      where: { id },
+      include: { dog: { include: { owner: true } }, kennel: true, invoiceLines: { where: { invoice: { status: { not: "CANCELLED" } } }, select: { invoiceId: true } } },
+    }),
     prisma.kennel.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
   ]);
   return { booking, kennels, user };
@@ -158,4 +162,26 @@ export async function getProduct(id: string) {
     include: { movements: { orderBy: { createdAt: "desc" }, take: 20, include: { user: { select: { name: true } } } } },
   });
   return { product, user };
+}
+
+export async function getInvoice(id: string) {
+  await requireRole("ADMIN");
+  const invoice = await prisma.invoice.findUnique({ where: { id }, include: { owner: true, lines: { orderBy: { id: "asc" } } } });
+  if (!invoice) return { invoice: null, uninvoicedSessions: 0 };
+  const uninvoicedSessions = await prisma.enrollment.count({
+    where: { dog: { ownerId: invoice.ownerId }, OR: [{ attended: null }, { attended: true }], invoiceLines: { none: { invoice: { status: { not: "CANCELLED" } } } } },
+  });
+  return { invoice, uninvoicedSessions };
+}
+
+export async function getSession(id: string) {
+  const user = await getCurrentUser();
+  const [session, dogs] = await Promise.all([
+    prisma.trainingSession.findUnique({
+      where: { id },
+      include: { enrollments: { include: { dog: { include: { owner: true } }, invoiceLines: { select: { invoiceId: true } } }, orderBy: { dog: { name: "asc" } } } },
+    }),
+    prisma.dog.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, owner: { select: { lastName: true } } } }),
+  ]);
+  return { session, dogs, user };
 }

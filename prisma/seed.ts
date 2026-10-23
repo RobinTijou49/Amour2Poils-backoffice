@@ -172,7 +172,7 @@ async function main() {
   await invoice("F-2026-0002", julien.id, "SENT", -21, -7, "Cours particulier", 1, 4000);
   await invoice("F-2026-0003", lucas.id, "PAID", -5, 9, "Puppy class (3 séances)", 3, 1800);
   await invoice("F-2026-0004", ines.id, "SENT", -3, 4, "Pension Pepper (3 nuits)", 3, 2000);
-  await invoice("F-2026-0005", camille.id, "DRAFT", 0, null, "Pension Rex (5 nuits)", 5, 2500, rexStay.id);
+  await invoice("BROUILLON-seed0001", camille.id, "DRAFT", 0, null, "Pension Rex (5 nuits)", 5, 2500, rexStay.id);
 
   console.log("Seed terminé : 1 admin, 1 employé, 6 boxes, 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures.");
 }

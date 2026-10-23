@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ButtonLink, focusRing } from "@/components/ui/button";
 import { Avatar, Card, PageHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
-import { ageInYears, daysBetween, formatDate, utcDay } from "@/lib/format";
+import { ageInYears, daysBetween, de, formatDate, utcDay } from "@/lib/format";
 import { getCurrentUser } from "@/lib/auth";
 import { getDog } from "@/lib/queries";
 import { bookingStatus } from "@/lib/status";
@@ -102,7 +102,7 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
         <div className="flex min-w-0 flex-col gap-4">
           <Card title="Vaccins">
             <DataTable
-              caption={`Vaccins de ${dog.name}`}
+              caption={`Vaccins ${de(dog.name)}`}
               rows={dog.vaccinations}
               rowKey={(v) => v.id}
               empty="Aucun vaccin enregistré."
@@ -117,7 +117,7 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
           </Card>
           <Card title="Séjours">
             <DataTable
-              caption={`Séjours de ${dog.name}`}
+              caption={`Séjours ${de(dog.name)}`}
               rows={dog.bookings}
               rowKey={(b) => b.id}
               empty="Aucun séjour."

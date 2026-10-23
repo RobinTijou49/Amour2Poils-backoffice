@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { ButtonLink, focusRing } from "@/components/ui/button";
 import { Card, PageHeader } from "@/components/ui/card";
 import { capitalize, formatDate, formatTime, utcDay } from "@/lib/format";
 import { getSessions } from "@/lib/queries";
@@ -12,7 +14,15 @@ export const metadata: Metadata = { title: "Séances" };
 export default function SessionsPage() {
   return (
     <>
-      <PageHeader title="Séances d'éducation et petsitting" subtitle="Les 7 prochains jours" />
+      <PageHeader
+        title="Séances d'éducation et petsitting"
+        subtitle="Les 7 prochains jours"
+        actions={
+          <ButtonLink href="/seances/nouvelle" icon="plus">
+            Planifier une séance
+          </ButtonLink>
+        }
+      />
       <Suspense fallback={<p className="text-foreground-light">Chargement des séances…</p>}>
         <Sessions />
       </Suspense>
@@ -39,7 +49,8 @@ async function Sessions() {
                 const count = s.enrollments.length;
                 const full = s.type !== "PETSITTING" && count >= s.capacity;
                 return (
-                  <li key={s.id} className="flex flex-col gap-1.5 rounded-sm bg-background-alt p-3">
+                  <li key={s.id}>
+                    <Link href={`/seances/${s.id}`} className={`flex flex-col gap-1.5 rounded-sm bg-background-alt p-3 hover:bg-sage-soft ${focusRing}`}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-foreground-light tabular-nums">{formatTime(s.startsAt)} · {s.durationMin} min</span>
                       {s.type === "PETSITTING" ? (
@@ -54,6 +65,7 @@ async function Sessions() {
                       {s.location && ` · ${s.location}`}
                       {count > 0 && ` · ${s.enrollments.map((e) => e.dog.name).join(", ")}`}
                     </p>
+                    </Link>
                   </li>
                 );
               })}

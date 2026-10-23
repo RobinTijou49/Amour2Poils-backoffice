@@ -6,14 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink, focusRing } from "@/components/ui/button";
 import { Avatar, Card, PageHeader } from "@/components/ui/card";
 import { nights } from "@/lib/bookings";
-import { formatDate, formatEuros } from "@/lib/format";
+import { de, formatDate, formatEuros } from "@/lib/format";
 import { getBooking } from "@/lib/queries";
 import { bookingStatus } from "@/lib/status";
+import { InvoiceBookingButton } from "../../facturation/invoice-booking-button";
 import { BookingActions } from "./booking-actions";
 
 export async function generateMetadata({ params }: PageProps<"/reservations/[id]">): Promise<Metadata> {
   const { booking } = await getBooking((await params).id);
-  return { title: booking ? `Séjour de ${booking.dog.name}` : "Réservation introuvable" };
+  return { title: booking ? `Séjour ${de(booking.dog.name)}` : "Réservation introuvable" };
 }
 
 export default function BookingPage({ params }: PageProps<"/reservations/[id]">) {
@@ -44,7 +45,7 @@ async function Booking({ params }: { params: PageProps<"/reservations/[id]">["pa
     <>
       <PageHeader
         leading={<Avatar name={booking.dog.name} size={64} />}
-        title={`Séjour de ${booking.dog.name}`}
+        title={`Séjour ${de(booking.dog.name)}`}
         subtitle={`Du ${formatDate(booking.startDate, { day: "numeric", month: "long" })} au ${formatDate(booking.endDate, { day: "numeric", month: "long", year: "numeric" })}`}
         actions={
           <ButtonLink href={`/reservations?semaine=${booking.startDate.toISOString().slice(0, 10)}`} variant="secondary" icon="chevronGauche">
@@ -72,6 +73,17 @@ async function Booking({ params }: { params: PageProps<"/reservations/[id]">["pa
           </dl>
         </Card>
         <Card title="Actions">
+          {user.role === "ADMIN" && booking.status !== "PENDING" && booking.status !== "CANCELLED" && (
+            <div className="border-b border-border pb-4">
+              {booking.invoiceLines[0] ? (
+                <ButtonLink href={`/facturation/${booking.invoiceLines[0].invoiceId}`} variant="secondary" icon="facture">
+                  Voir la facture du séjour
+                </ButtonLink>
+              ) : (
+                <InvoiceBookingButton bookingId={booking.id} />
+              )}
+            </div>
+          )}
           {booking.status === "COMPLETED" || booking.status === "CANCELLED" ? (
             <p className="text-foreground-light">Ce séjour est {status.label.toLowerCase()} : plus aucune action possible.</p>
           ) : (

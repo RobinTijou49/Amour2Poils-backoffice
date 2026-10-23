@@ -19,6 +19,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | PWA : installable (pwa-01) | `manifest.ts`, icônes PNG générées par `next/og` (192, 512, maskable), `themeColor` clair/sombre, exclusion du manifeste et des icônes dans `proxy.ts` | Sans cette exclusion le manifeste redirigeait vers /connexion (non installable) ; icône relue à l'écran ; pas de captures d'écran dans le manifeste (à ajouter), audit Lighthouse PWA à faire sur build de production |
 
+| 2026-10-23 | PWA : service worker (pwa-02) | `public/sw.js` écrit à la main (cache d'abord pour `/_next/static` et icônes, réseau d'abord + page `/offline` pour les navigations), enregistrement en production seulement, en-têtes `no-cache` sur `/sw.js` | **Choix contre le plan** : pas de Serwist ni de cache des pages, car elles contiennent des données clients lisibles après déconnexion ; les données hors ligne passeront par IndexedDB (pwa-03). Testé dans Chrome sur build de production : activation, cache, puis page hors connexion serveur coupé. Le navigateur intégré à l'app ne gère pas les service workers (faux négatif) |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

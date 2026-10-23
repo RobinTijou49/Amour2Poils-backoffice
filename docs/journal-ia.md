@@ -14,6 +14,7 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 | 2026-10-23 | Actions d'écriture des réservations | Règles métier, Server Actions, formulaire, détail, actions rapides | Formulaire vidé par React 19 après une erreur (valeurs renvoyées par l'action) ; titre d'onglet perdu après une action (`generateMetadata`) ; `usePathname` du menu mobile signalé au build (lu après la session) |
 | 2026-10-23 | Clients, chiens et stock | Formulaire chien + propriétaire, vaccins, recherche, mouvements de stock en transaction | Test « puce en double » faussé : la puce de Rex n'existait que dans la maquette, pas en base (refait sur un vrai doublon) ; `typecheck` complété par `next typegen` pour les nouvelles routes |
 | 2026-10-23 | Facturation et séances | Factures depuis séjours et séances, numérotation à l'envoi, impression, séances, inscriptions, présence | **Bug SQL trouvé au test** : `attended: { not: false }` excluait aussi les présences non notées (`NULL`), donc aucune séance n'était facturable ; ergonomie : bouton « Facturer » ajouté sur la séance ; élision « Séjour d'Oslo » |
+| 2026-10-23 | Tableau de bord : actions | Entrée de stock depuis l'alerte « Stock bas », « Marquer payée » sur les factures à échéance (gérance), réutilisant les Server Actions existantes | Lint et typecheck passés ; non testé dans le navigateur (à faire) ; rôle déjà revérifié côté serveur, le bouton est seulement masqué aux employés |
 
 ## Points d'attention relevés
 

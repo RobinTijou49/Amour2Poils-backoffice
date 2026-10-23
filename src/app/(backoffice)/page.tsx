@@ -6,7 +6,9 @@ import { Avatar, Card, KpiCard, PageHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Icon } from "@/components/ui/icons";
 import { capitalize, daysBetween, formatDate, formatEuros, formatTime } from "@/lib/format";
+import { getCurrentUser } from "@/lib/auth";
 import { getDashboard } from "@/lib/queries";
+import { MarkPaidForm, RestockForm } from "./dashboard-actions";
 import { QuickAction } from "./reservations/quick-action";
 import { kennelSize, sessionType } from "@/lib/status";
 
@@ -35,6 +37,7 @@ export default function DashboardPage() {
 
 async function Dashboard() {
   const d = await getDashboard();
+  const isAdmin = (await getCurrentUser()).role === "ADMIN";
   const movements = [
     ...d.arrivals.map((b) => ({ id: b.id, dog: b.dog, kennel: b.kennel?.name ?? "—", what: "Arrivée", tone: "warning" as const, kind: b.status === "CONFIRMED" ? ("in" as const) : null })),
     ...d.departures.map((b) => ({ id: b.id, dog: b.dog, kennel: b.kennel?.name ?? "—", what: "Départ", tone: "info" as const, kind: b.status === "CHECKED_IN" ? ("out" as const) : null })),
@@ -48,15 +51,17 @@ async function Dashboard() {
         title: days < 0 ? "Vaccin expiré" : "Vaccin bientôt expiré",
         detail: `${v.dog.name} · ${v.name} ${days < 0 ? `expiré depuis ${-days} jours` : `expire dans ${days} jours`}`,
         href: `/chiens/${v.dogId}`,
+        action: null as React.ReactNode,
       };
     }),
-    ...d.lowStock.map((p) => ({ key: p.id, tone: "text-warning-fg", title: "Stock bas", detail: `${p.name} · ${p.quantity} ${p.unit} restant(s) (seuil ${p.alertThreshold})`, href: "/stock" })),
+    ...d.lowStock.map((p) => ({ key: p.id, tone: "text-warning-fg", title: "Stock bas", detail: `${p.name} · ${p.quantity} ${p.unit} restant(s) (seuil ${p.alertThreshold})`, href: "/stock", action: <RestockForm productId={p.id} name={p.name} unit={p.unit} /> })),
     ...d.invoices.map((i) => ({
       key: i.id,
       tone: "text-info-fg",
       title: "Facture à échéance",
       detail: `${i.number} · ${i.owner.firstName} ${i.owner.lastName} · ${formatEuros(i.lines.reduce((s, l) => s + l.quantity * l.unitPriceCents, 0))}`,
       href: "/facturation",
+      action: isAdmin ? <MarkPaidForm id={i.id} number={i.number} /> : null,
     })),
   ];
   const occupancy = d.capacity ? Math.round((d.present / d.capacity) * 100) : 0;
@@ -131,6 +136,7 @@ async function Dashboard() {
                         <span className="text-sm text-foreground-light">{a.detail}</span>
                       </span>
                     </Link>
+                    {a.action && <div className="mt-2 pl-9">{a.action}</div>}
                   </li>
                 ))}
               </ul>

@@ -11,6 +11,7 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Coder la maquette en Next.js | Composants UI, layout, 7 pages branchées sur Prisma, seed enrichi | Build cassé par `usePathname` hors `<Suspense>` sur la route dynamique (corrigé) ; « chiens présents » comptait les arrivées non enregistrées (corrigé) |
 | 2026-10-23 | Authentification et rôles | Sessions en base, connexion/déconnexion, proxy, rôles | Choix de `cache()` de React au lieu de `use cache: private` (résultat gardé en mémoire en dev, risqué après une déconnexion) ; oubli de la déconnexion sur mobile repéré au test et corrigé |
+| 2026-10-23 | Actions d'écriture des réservations | Règles métier, Server Actions, formulaire, détail, actions rapides | Formulaire vidé par React 19 après une erreur (valeurs renvoyées par l'action) ; titre d'onglet perdu après une action (`generateMetadata`) ; `usePathname` du menu mobile signalé au build (lu après la session) |
 
 ## Points d'attention relevés
 

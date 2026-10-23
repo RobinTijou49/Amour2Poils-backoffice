@@ -123,3 +123,21 @@ export async function getSessions(weekStart: Date) {
     orderBy: { startsAt: "asc" },
   });
 }
+
+export async function getBookingFormOptions() {
+  await getCurrentUser();
+  const [dogs, kennels] = await Promise.all([
+    prisma.dog.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, breed: true, owner: { select: { lastName: true } } } }),
+    prisma.kennel.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+  ]);
+  return { dogs, kennels };
+}
+
+export async function getBooking(id: string) {
+  const user = await getCurrentUser();
+  const [booking, kennels] = await Promise.all([
+    prisma.booking.findUnique({ where: { id }, include: { dog: { include: { owner: true } }, kennel: true } }),
+    prisma.kennel.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+  ]);
+  return { booking, kennels, user };
+}

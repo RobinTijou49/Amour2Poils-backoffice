@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,11 @@ import { DataTable } from "@/components/ui/data-table";
 import { ageInYears, daysBetween, formatDate, utcDay } from "@/lib/format";
 import { getDog } from "@/lib/queries";
 import { bookingStatus } from "@/lib/status";
+
+export async function generateMetadata({ params }: PageProps<"/chiens/[id]">): Promise<Metadata> {
+  const dog = await getDog((await params).id);
+  return { title: dog ? dog.name : "Chien introuvable" };
+}
 
 export default function DogPage({ params }: PageProps<"/chiens/[id]">) {
   return (
@@ -46,7 +52,6 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
 
   return (
     <>
-      <title>{`${dog.name} · Amour 2 Poils`}</title>
       <PageHeader
         leading={<Avatar name={dog.name} size={64} />}
         title={dog.name}

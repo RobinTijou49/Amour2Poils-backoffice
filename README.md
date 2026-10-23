@@ -136,6 +136,27 @@ Maquette : <https://www.figma.com/design/2ju0WFXMpBtETVELEKz6Ee>
   Avec `cacheComponents`, chaque requête appelle `connection()` et s'affiche dans un `<Suspense>` :
   la coquille est prérendue, les données sont streamées (*Partial Prerendering*).
 
+### Réservations : cycle de vie
+
+```mermaid
+stateDiagram-v2
+  [*] --> PENDING : demande sans box
+  [*] --> CONFIRMED : demande avec box
+  PENDING --> CONFIRMED : box attribuée
+  CONFIRMED --> CHECKED_IN : arrivée
+  CHECKED_IN --> COMPLETED : départ
+  PENDING --> CANCELLED : annulation (gérance)
+  CONFIRMED --> CANCELLED : annulation (gérance)
+```
+
+- Règles métier pures dans [`src/lib/bookings.ts`](src/lib/bookings.ts) : transitions autorisées, nuits, contrôle de
+  capacité nuit par nuit (une box de 2 places accepte deux séjours qui se chevauchent, pas trois).
+- Server Actions dans [`reservations/actions.ts`](src/app/(backoffice)/reservations/actions.ts) : session vérifiée,
+  entrées validées avec Zod, transition revérifiée côté serveur, puis `refresh()` pour mettre l'écran à jour.
+- Écrans : `/reservations/nouvelle` (formulaire, erreurs reliées aux champs, saisie conservée en cas d'erreur),
+  `/reservations/[id]` (détail et actions selon le statut, annulation confirmée dans la page), boutons
+  « Arrivée » / « Départ » directement dans le tableau de bord.
+
 ### Authentification et rôles
 
 Sessions maison, sans bibliothèque, pour maîtriser et expliquer chaque mécanisme :

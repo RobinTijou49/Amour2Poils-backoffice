@@ -7,6 +7,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Icon } from "@/components/ui/icons";
 import { capitalize, daysBetween, formatDate, formatEuros, formatTime } from "@/lib/format";
 import { getDashboard } from "@/lib/queries";
+import { QuickAction } from "./reservations/quick-action";
 import { kennelSize, sessionType } from "@/lib/status";
 
 export default function DashboardPage() {
@@ -19,7 +20,7 @@ export default function DashboardPage() {
             <ButtonLink href="/chiens" variant="secondary" icon="clients">
               Clients et chiens
             </ButtonLink>
-            <ButtonLink href="/reservations" icon="plus">
+            <ButtonLink href="/reservations/nouvelle" icon="plus">
               Nouvelle réservation
             </ButtonLink>
           </>
@@ -35,8 +36,8 @@ export default function DashboardPage() {
 async function Dashboard() {
   const d = await getDashboard();
   const movements = [
-    ...d.arrivals.map((b) => ({ id: b.id, dog: b.dog, kennel: b.kennel?.name ?? "—", what: "Arrivée", tone: "warning" as const })),
-    ...d.departures.map((b) => ({ id: b.id, dog: b.dog, kennel: b.kennel?.name ?? "—", what: "Départ", tone: "info" as const })),
+    ...d.arrivals.map((b) => ({ id: b.id, dog: b.dog, kennel: b.kennel?.name ?? "—", what: "Arrivée", tone: "warning" as const, kind: b.status === "CONFIRMED" ? ("in" as const) : null })),
+    ...d.departures.map((b) => ({ id: b.id, dog: b.dog, kennel: b.kennel?.name ?? "—", what: "Départ", tone: "info" as const, kind: b.status === "CHECKED_IN" ? ("out" as const) : null })),
   ];
   const alerts = [
     ...d.vaccinations.map((v) => {
@@ -91,6 +92,10 @@ async function Dashboard() {
                 },
                 { header: "Box", cell: (m) => m.kennel },
                 { header: "Mouvement", cell: (m) => <Badge tone={m.tone}>{m.what}</Badge> },
+                {
+                  header: "Action",
+                  cell: (m) => (m.kind ? <QuickAction id={m.id} kind={m.kind} dogName={m.dog.name} /> : <Badge tone="success">Fait</Badge>),
+                },
               ]}
             />
           </Card>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { MobileUserBar, UserCard, UserNav } from "@/components/current-user";
-import { SideNavLinks, TabBar, TabBarLinks } from "@/components/navigation";
+import { MobileUserBar, UserCard, UserNav, UserTabBar } from "@/components/current-user";
+import { SideNavLinks, TabBarLinks } from "@/components/navigation";
 import { focusRing } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
 
@@ -51,7 +51,7 @@ export default function BackofficeLayout({ children }: LayoutProps<"/">) {
 
       <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
         <Suspense fallback={<TabBarLinks pathname="" />}>
-          <TabBar />
+          <UserTabBar />
         </Suspense>
       </nav>
     </div>

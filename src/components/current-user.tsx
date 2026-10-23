@@ -1,6 +1,6 @@
 import { logout } from "@/app/connexion/actions";
 import { getCurrentUser, roleLabel } from "@/lib/auth";
-import { SideNav } from "./navigation";
+import { SideNav, TabBar } from "./navigation";
 import { focusRing } from "./ui/button";
 import { Avatar } from "./ui/card";
 import { Icon } from "./ui/icons";
@@ -9,6 +9,11 @@ import { Icon } from "./ui/icons";
 export async function UserNav() {
   const user = await getCurrentUser();
   return <SideNav isAdmin={user.role === "ADMIN"} />;
+}
+
+export async function UserTabBar() {
+  await getCurrentUser();
+  return <TabBar />;
 }
 
 // Barre supérieure mobile (maquette « Barre supérieure ») : la barre latérale y est masquée.

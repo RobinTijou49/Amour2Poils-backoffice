@@ -55,6 +55,9 @@ async function Planning({ searchParams }: { searchParams: PageProps<"/reservatio
             <ButtonLink href={`/reservations?semaine=${iso(utcDay(monday, 7))}`} variant="secondary">
               Semaine suivante
             </ButtonLink>
+            <ButtonLink href="/reservations/nouvelle" icon="plus">
+              Nouvelle réservation
+            </ButtonLink>
           </>
         }
       />
@@ -105,7 +108,7 @@ async function Planning({ searchParams }: { searchParams: PageProps<"/reservatio
                     return (
                       <Link
                         key={b.id}
-                        href={`/chiens/${b.dog.id}`}
+                        href={`/reservations/${b.id}`}
                         style={{ gridColumn: `${start + 1} / ${end + 1}`, gridRow: 1 }}
                         className={`pointer-events-auto mx-1 flex h-10 items-center truncate rounded-sm border-l-4 px-3 text-sm font-semibold ${barTone[b.status]} ${focusRing}`}
                       >
@@ -148,6 +151,14 @@ async function Planning({ searchParams }: { searchParams: PageProps<"/reservatio
                 `${formatDate(b.startDate, { day: "numeric", month: "short" })} → ${formatDate(b.endDate, { day: "numeric", month: "short" })} · ${daysBetween(b.startDate, b.endDate)} nuits`,
             },
             { header: "Statut", cell: (b) => <Badge tone={bookingStatus[b.status].tone}>{bookingStatus[b.status].label}</Badge> },
+            {
+              header: "Action",
+              cell: (b) => (
+                <ButtonLink href={`/reservations/${b.id}`} variant="secondary" aria-label={`Attribuer une box à ${b.dog.name}`}>
+                  Attribuer une box
+                </ButtonLink>
+              ),
+            },
           ]}
         />
       </Card>

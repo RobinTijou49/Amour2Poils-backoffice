@@ -39,6 +39,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Rappels de vaccins planifiés | `rappels.yml` (GitHub Actions, quotidien + manuel) car le VPS n'a pas `crontab` et pas de `sudo` sans mot de passe ; secret `CRON_SECRET` posé avec `gh` (empreinte comparée à celle du VPS, valeur jamais affichée) ; vaccin « Rage » d'Oslo expirant sous 5 jours ajouté au seed et en production par SQL ; message du seed corrigé | Les `id` Prisma (`cuid()`) sont générés par l'application, pas par la base : l'insertion SQL a dû fournir un `id`. Workflow validé avec actionlint |
 
+| 2026-10-23 | Test réel des notifications en production | Correction de `isSameOrigin` (`src/lib/api.ts`) : comparaison de l'hôte de `Origin` avec `X-Forwarded-Host` / `Host` au lieu de `request.url` | **Bug découvert seulement en production, dans le vrai navigateur** : derrière les deux Caddy, `request.url` ne porte pas le nom public, donc toute écriture sur `/api` répondait 403 « Origine refusée » (l'abonnement push, mais aussi la synchro hors ligne et l'API). Mes tests `curl` ne le montraient pas : sans cookie, le proxy répond 401 avant le contrôle d'origine, et les tests locaux n'ont pas de proxy. Leçon : tester avec une vraie session, derrière le même chemin réseau |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

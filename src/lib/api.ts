@@ -11,10 +11,22 @@ export async function apiUser() {
   return (await getSession())?.user ?? null;
 }
 
-/** Une écriture doit venir de notre propre site : le cookie SameSite=Lax ne protège pas tout (voir phase sécurité). */
+/**
+ * Une écriture doit venir de notre propre site : le cookie SameSite=Lax ne protège pas tout (voir phase sécurité).
+ * On compare l'hôte de `Origin` à l'hôte demandé par le navigateur. `request.url` ne convient pas en production :
+ * derrière les reverse proxies (Caddy) il porte l'adresse interne, pas `amour2poils.duckdns.org`.
+ * Un navigateur ne laisse pas un autre site modifier `Origin`, `Host` ni `X-Forwarded-Host`.
+ */
 export function isSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
+  if (!origin) return true;
+  // Plusieurs proxys successifs peuvent produire « hôte1, hôte2 » : le premier est celui du navigateur.
+  const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? new URL(request.url).host).split(",")[0].trim();
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
 }
 
 /** Corps JSON, ou `null` s'il est illisible. */

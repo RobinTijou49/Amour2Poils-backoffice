@@ -97,7 +97,10 @@ jobs:
       HOME: /root # Firefox/Chromium dans un conteneur : consigne Playwright
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      # setup-bun a besoin de `unzip`, absent de l'image Playwright ; Node y est déjà : on installe Bun par npm,
+      # à la version exacte du projet (champ packageManager de package.json).
+      - name: Installer Bun
+        run: npm install --global bun@1.4.4
       - run: bun install --frozen-lockfile
       - run: bun run build
       - name: Tests de bout en bout

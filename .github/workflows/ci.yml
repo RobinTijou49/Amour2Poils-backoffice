@@ -73,6 +73,11 @@ jobs:
   # Tests de bout en bout : un vrai navigateur (Chromium) pilote la construction de production sur une base jetable.
   e2e:
     runs-on: ubuntu-latest
+    # Image officielle : Chromium et ses dépendances système y sont déjà installés. `playwright install --with-deps` prenait
+    # ~15 minutes (apt) pour 70 secondes de tests. LA VERSION DE L'IMAGE DOIT ÊTRE CELLE DE @playwright/test (package.json) :
+    # Dependabot ne met pas à jour cette ligne, à changer à la main avec le paquet.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
     services:
       postgres:
         image: postgres:17-alpine
@@ -80,22 +85,20 @@ jobs:
           POSTGRES_USER: ci
           POSTGRES_PASSWORD: ci
           POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
         options: >-
           --health-cmd "pg_isready -U ci"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
+      # Dans un conteneur, le service est joignable par son nom (« postgres »), pas par localhost.
       # La base de test est créée par tests/e2e/global-setup.ts (son nom doit finir par _test).
-      E2E_DATABASE_URL: postgresql://ci:ci@localhost:5432/amour2poils_e2e_test?schema=public
+      E2E_DATABASE_URL: postgresql://ci:ci@postgres:5432/amour2poils_e2e_test?schema=public
+      HOME: /root # Firefox/Chromium dans un conteneur : consigne Playwright
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - name: Installer Chromium (avec ses dépendances système)
-        run: bunx playwright install --with-deps chromium
       - run: bun run build
       - name: Tests de bout en bout
         run: bunx playwright test

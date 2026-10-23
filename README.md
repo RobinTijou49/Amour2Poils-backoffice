@@ -253,6 +253,20 @@ docker compose -f docker-compose.prod.yml --env-file .env.production run --rm   
 
 **Rappels de vaccins** : le VPS n'a pas de `cron` utilisable sans droits root ; le workflow `.github/workflows/rappels.yml` appelle chaque matin (7 h UTC) `POST /api/push/rappels-vaccins` avec le secret GitHub `CRON_SECRET` (identique à celui de `.env.production`). Lancement manuel possible : onglet Actions, « Rappels de vaccins », Run workflow.
 
+## Sécurité
+
+Détail et décisions dans [docs/journal-ia.md](docs/journal-ia.md) ; audit des accès dans [docs/audit-securite.md](docs/audit-securite.md).
+
+| Sujet | Mise en œuvre |
+|---|---|
+| **CSP** | `src/proxy.ts` : nonce aléatoire par requête, `script-src 'self' 'nonce-…' 'strict-dynamic'` sans `unsafe-inline`, `object-src 'none'`, `frame-ancestors 'none'`, `form-action 'self'`. Rapports de violation : `POST /api/csp-report`. `cacheComponents` est désactivé pour que chaque page soit rendue à la demande (sinon pas de nonce). `style-src` garde `unsafe-inline` (attributs `style=`). |
+| **En-têtes** | `next.config.ts` : HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, COOP ; CSP propre à `sw.js`. |
+| **Secrets** | `.env` jamais commité ; variables validées au démarrage (`src/lib/env.ts`, `src/instrumentation.ts`) ; la CI échoue si un secret ou un `.env` se retrouve dans le code client ou la sortie autonome ; secrets GitHub pour SSH et le cron. |
+| **XSS** | React échappe tout ; aucun `dangerouslySetInnerHTML` ; charges malveillantes testées sur 8 écrans ; CSP en seconde ligne ; redirection ouverte du service worker corrigée. |
+| **CSRF** | Cookie `HttpOnly`, `Secure`, `SameSite=Lax` ; Server Actions : contrôle `Origin`/`Host` de Next ; API : `Sec-Fetch-Site`, `Origin` et JSON obligatoire (pas de jeton synchronisé, choix documenté). |
+| **Autorisation** | Session et rôle revérifiés dans chaque action et chaque route ; pages gérance en vrai 403 ; mots de passe argon2id ; 5 échecs / 15 min par e-mail. |
+| **Dépendances** | `bun audit` bloquant en CI (une exception justifiée et datée) ; Dependabot hebdomadaire (bun, GitHub Actions, Docker) et alertes de sécurité activées ; *secret scanning* et protection au push activés. |
+
 ## Structure
 
 ```

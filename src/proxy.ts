@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
 //     (session valide en base, rôle) se fait dans src/lib/auth.ts.
 
 // Bascule du mode « rapport seulement » (le navigateur signale les violations sans rien bloquer) au mode bloquant.
-const ENFORCE_CSP = false;
+const ENFORCE_CSP = true;
 
 // Pages et routes accessibles sans session.
 const PUBLIC_PATHS = ["/connexion", "/offline", "/api/health", "/api/push/rappels-vaccins", "/api/csp-report"];

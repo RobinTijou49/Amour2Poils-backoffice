@@ -25,6 +25,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      - name: Audit des dépendances
+        # Échoue sur toute faille « high » ou « critical ». Une seule exception, ignorée volontairement : braces
+        # (GHSA-vfj7-8cjw-p6xm, déni de service par motif imbriqué), présent uniquement via eslint-config-next, donc
+        # absent de l'image de production (vérifié), et sans version corrigée publiée. À retirer dès qu'un correctif sort.
+        run: bun audit --audit-level=high --ignore GHSA-vfj7-8cjw-p6xm
       - run: bun run lint
       - run: bun run typecheck
       # Les tests unitaires, d'intégration et E2E seront ajoutés ici (phase 3).

@@ -1,0 +1,30 @@
+# Dependabot : propose chaque semaine les mises à jour de dépendances (et immédiatement les correctifs de sécurité).
+version: 2
+updates:
+  # Paquets du projet (bun.lock)
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Les mises à jour mineures et correctifs sont regroupés en une seule demande, plus facile à relire.
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      # Prisma est volontairement fixé en 7.10.1 : le tag `latest` est une version 8 incompatible avec le client généré.
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/*"
+        update-types: ["version-update:semver-major"]
+  # Actions utilisées par les workflows (checkout, setup-bun, docker/*)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  # Images de base du Dockerfile (oven/bun)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"

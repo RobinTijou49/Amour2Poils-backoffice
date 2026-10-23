@@ -1,0 +1,25 @@
+name: Rappels de vaccins
+
+# Le VPS n'a pas de cron utilisable sans droits root : GitHub Actions appelle chaque matin la route
+# protégée par `CRON_SECRET`, qui envoie une notification push si des vaccins expirent sous 7 jours.
+on:
+  schedule:
+    - cron: "0 7 * * *" # 7 h UTC, soit 8 h ou 9 h à Paris selon la saison
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  rappels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler la route de rappel
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          [ -n "$CRON_SECRET" ] || { echo "::error::Secret CRON_SECRET manquant"; exit 1; }
+          # -f : un code HTTP d'erreur (401, 5xx) fait échouer le job, on est prévenu par GitHub.
+          curl -fsS --retry 3 --retry-delay 10 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://amour2poils.duckdns.org/api/push/rappels-vaccins
+          echo

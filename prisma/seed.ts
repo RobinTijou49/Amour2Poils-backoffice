@@ -138,7 +138,7 @@ async function main() {
   const julien = await prisma.owner.create({
     data: {
       firstName: "Julien", lastName: "Petit", email: "julien.petit@example.com", phone: "06 55 44 33 22",
-      dogs: { create: { name: "Oslo", breed: "Husky", sex: "MALE", birthDate: new Date("2022-01-15"), weightKg: 22, vaccinations: { create: [{ name: "CHPPiL", administeredAt: day(-90), expiresAt: day(275) }] } } },
+      dogs: { create: { name: "Oslo", breed: "Husky", sex: "MALE", birthDate: new Date("2022-01-15"), weightKg: 22, vaccinations: { create: [{ name: "CHPPiL", administeredAt: day(-90), expiresAt: day(275) }, { name: "Rage", administeredAt: day(-360), expiresAt: day(5) }] } } },
     },
     include: { dogs: true },
   });
@@ -174,7 +174,7 @@ async function main() {
   await invoice("F-2026-0004", ines.id, "SENT", -3, 4, "Pension Pepper (3 nuits)", 3, 2000);
   await invoice("BROUILLON-seed0001", camille.id, "DRAFT", 0, null, "Pension Rex (5 nuits)", 5, 2500, rexStay.id);
 
-  console.log("Seed terminé : 1 admin, 1 employé, 6 boxes, 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures.");
+  console.log("Seed terminé : comptes selon les variables SEED_*, 6 boxes, 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures.");
 }
 
 main()

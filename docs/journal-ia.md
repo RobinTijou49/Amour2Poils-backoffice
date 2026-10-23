@@ -37,6 +37,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Données de test en production | Seed lancé sur le VPS par SSH (mot de passe passé par l'entrée standard) : 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures ; comptes de démonstration à mot de passe faible volontairement non créés | Base vérifiée **avant** (1 utilisateur, tables vides) car le seed efface tout ; la première tentative a été bloquée par le contrôle de sécurité de Claude Code, relancée après ajout d'une règle par l'utilisateur. Le message final du seed (« 1 employé ») est écrit en dur et faux : un seul compte existe (`admin@admin.fr`). À retirer avant une vraie mise en production |
 
+| 2026-10-23 | Rappels de vaccins planifiés | `rappels.yml` (GitHub Actions, quotidien + manuel) car le VPS n'a pas `crontab` et pas de `sudo` sans mot de passe ; secret `CRON_SECRET` posé avec `gh` (empreinte comparée à celle du VPS, valeur jamais affichée) ; vaccin « Rage » d'Oslo expirant sous 5 jours ajouté au seed et en production par SQL ; message du seed corrigé | Les `id` Prisma (`cuid()`) sont générés par l'application, pas par la base : l'insertion SQL a dû fournir un `id`. Workflow validé avec actionlint |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

@@ -249,7 +249,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.production run --rm   
 
 **HTTPS** : le VPS héberge un autre projet (`salon2danse`) dont le Caddy tient déjà les ports 80 et 443, et le port 8082 est filtré depuis l'extérieur. Le site est donc publié sur `https://amour2poils.duckdns.org` (sous-domaine DuckDNS pointant sur le VPS) : un bloc ajouté à la main au `Caddyfile` de `salon2danse` envoie ce nom vers notre Caddy (`172.17.0.1:8082`), et Let's Encrypt fournit le certificat. HTTPS est requis pour l'installation de la PWA et les notifications push. Limite : ce `Caddyfile` est suivi par Git dans l'autre projet ; la sauvegarde d'origine est dans `~/amour2poils/Caddyfile.salon2danse.bak`, et un `git pull` échouera (sans rien écraser) si ce fichier change en amont.
 
-**Rappels de vaccins** : un cron du VPS appelle `POST /api/push/rappels-vaccins` avec `Authorization: Bearer $CRON_SECRET`.
+**Rappels de vaccins** : le VPS n'a pas de `cron` utilisable sans droits root ; le workflow `.github/workflows/rappels.yml` appelle chaque matin (7 h UTC) `POST /api/push/rappels-vaccins` avec le secret GitHub `CRON_SECRET` (identique à celui de `.env.production`). Lancement manuel possible : onglet Actions, « Rappels de vaccins », Run workflow.
 
 ## Structure
 

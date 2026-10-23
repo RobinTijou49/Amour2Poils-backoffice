@@ -8,7 +8,7 @@
 //  - tout le reste (API, Server Actions, POST) : jamais intercepté.
 // Les données consultables hors ligne (planning, fiches chiens) sont lues dans IndexedDB par la page /offline.
 
-const VERSION = "v4";
+const VERSION = "v5";
 const STATIC_CACHE = `a2p-static-${VERSION}`;
 const SHELL_CACHE = `a2p-shell-${VERSION}`;
 const OFFLINE_URL = "/offline";
@@ -40,6 +40,13 @@ self.addEventListener("activate", (event) => {
 });
 
 // Notifications push : le serveur envoie { title, body, url, tag } (voir src/lib/push.ts).
+// `url` doit être un chemin de notre site. « /chemin » est accepté ; « //autre-site.fr » (qui signifie « même
+// protocole, autre site »), « /\autre-site.fr » et « https://… » sont refusés : sinon un clic sur une notification
+// pourrait envoyer l'utilisateur ailleurs.
+function internalPath(url) {
+  return typeof url === "string" && /^\/(?![/\\])/.test(url) ? url : "/";
+}
+
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -53,14 +60,16 @@ self.addEventListener("push", (event) => {
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
       tag: data.tag, // une notification de même tag remplace la précédente au lieu de s'empiler
-      data: { url: typeof data.url === "string" && data.url.startsWith("/") ? data.url : "/" },
+      data: { url: internalPath(data.url) },
     }),
   );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  // Deuxième contrôle à l'ouverture : même si les données de la notification étaient altérées, on reste sur notre origine.
+  const resolved = new URL(internalPath(event.notification.data?.url), self.location.origin);
+  const target = resolved.origin === self.location.origin ? resolved.href : self.location.origin + "/";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
       // Réutilise un onglet déjà ouvert sur l'application, sinon en ouvre un.

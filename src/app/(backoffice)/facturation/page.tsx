@@ -8,12 +8,15 @@ import type { InvoiceStatus } from "@/generated/prisma/client";
 import { Card, KpiCard, PageHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { formatDate, formatEuros } from "@/lib/format";
+import { requireRole } from "@/lib/auth";
 import { getInvoices } from "@/lib/queries";
 import { invoiceStatus } from "@/lib/status";
 
 export const metadata: Metadata = { title: "Facturation" };
 
-export default function InvoicesPage({ searchParams }: PageProps<"/facturation">) {
+export default async function InvoicesPage({ searchParams }: PageProps<"/facturation">) {
+  // Rôle vérifié avant tout rendu : un employé reçoit un vrai 403, pas une page 200 « remplacée » en cours de streaming.
+  await requireRole("ADMIN");
   return (
     <>
       <PageHeader title="Facturation" subtitle="Les factures de séjour se créent depuis le détail d'une réservation." />

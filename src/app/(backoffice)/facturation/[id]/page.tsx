@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { requireRole } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, PageHeader } from "@/components/ui/card";
@@ -17,7 +18,8 @@ export async function generateMetadata({ params }: PageProps<"/facturation/[id]"
   return { title: isProvisionalNumber(invoice.number) ? "Brouillon de facture" : `Facture ${invoice.number}` };
 }
 
-export default function InvoicePage({ params }: PageProps<"/facturation/[id]">) {
+export default async function InvoicePage({ params }: PageProps<"/facturation/[id]">) {
+  await requireRole("ADMIN"); // 403 avant tout rendu, voir facturation/page.tsx
   return (
     <Suspense fallback={<p className="text-foreground-light">Chargement de la facture…</p>}>
       <Invoice params={params} />

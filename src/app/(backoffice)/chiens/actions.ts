@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { Prisma } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { fieldErrors, formValues, isUniqueViolation, optional, type FormState } from "@/lib/forms";
 import { prisma } from "@/lib/prisma";
@@ -103,6 +104,9 @@ export async function saveDog(_prev: FormState, formData: FormData): Promise<For
     });
   } catch (e) {
     if (isUniqueViolation(e)) return { error: "Ces informations sont déjà utilisées par une autre fiche.", values };
+    // Identifiant de fiche (P2025) ou de propriétaire (P2003) inexistant : formulaire modifié à la main ou fiche supprimée entre-temps.
+    const code = e instanceof Prisma.PrismaClientKnownRequestError ? e.code : "";
+    if (code === "P2025" || code === "P2003") return { error: "Fiche ou propriétaire introuvable : rechargez la page.", values };
     throw e;
   }
   redirect(`/chiens/${savedId}`);

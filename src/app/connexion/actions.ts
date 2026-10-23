@@ -38,6 +38,12 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   }
 
   await prisma.loginAttempt.deleteMany({ where: { email } });
+  // Ménage à chaque connexion réussie : sessions expirées et anciennes tentatives de tous les comptes
+  // (sinon ces tables grossissent sans fin et gardent des adresses e-mail saisies par des inconnus).
+  await prisma.$transaction([
+    prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } }),
+    prisma.loginAttempt.deleteMany({ where: { createdAt: { lt: since } } }),
+  ]);
   await createSession(user.id);
   redirect("/");
 }

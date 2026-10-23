@@ -82,6 +82,9 @@ export async function setAttendance(_prev: FormState, formData: FormData): Promi
   await getCurrentUser();
   const id = String(formData.get("id") ?? "");
   const attended = formData.get("attended") === "yes";
+  // Un identifiant inconnu (formulaire modifié à la main) donne une erreur claire plutôt qu'un plantage.
+  const found = await prisma.enrollment.findUnique({ where: { id }, include: { dog: true } });
+  if (!found) return { error: "Inscription introuvable." };
   const enrollment = await prisma.enrollment.update({ where: { id }, data: { attended }, include: { dog: true } });
   refresh();
   return { success: `${enrollment.dog.name} noté ${attended ? "présent" : "absent"}.` };

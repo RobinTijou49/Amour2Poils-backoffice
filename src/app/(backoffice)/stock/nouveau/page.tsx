@@ -6,7 +6,8 @@ import { ProductForm } from "../stock-forms";
 
 export const metadata: Metadata = { title: "Nouveau produit" };
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  await requireRole("ADMIN"); // 403 avant tout rendu
   return (
     <>
       <PageHeader title="Nouveau produit" />

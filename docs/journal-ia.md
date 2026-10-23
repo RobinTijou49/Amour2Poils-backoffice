@@ -17,6 +17,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 | 2026-10-23 | Tableau de bord : actions | Entrée de stock depuis l'alerte « Stock bas », « Marquer payée » sur les factures à échéance (gérance), réutilisant les Server Actions existantes | Lint et typecheck passés ; non testé dans le navigateur (à faire) ; rôle déjà revérifié côté serveur, le bouton est seulement masqué aux employés |
 | 2026-10-23 | API intégrée (mod-08) | Route Handlers `/api/reservations`, `/api/stock`, `/api/chiens`, services partagés avec les Server Actions (`booking-service`, `stock-service`), garde 401/403 + contrôle d'Origin, proxy qui répond 401 JSON sur `/api` | Premier jet de commande shell cassé (guillemets) : aucun fichier créé, refait à la main ; testé en curl avec une session temporaire (401, 403 origine, 422, 409 stock et capacité, 404) ; message Zod « Saisissez une quantité » trompeur au-delà de 10 000 (existant, à revoir) |
 
+| 2026-10-23 | PWA : installable (pwa-01) | `manifest.ts`, icônes PNG générées par `next/og` (192, 512, maskable), `themeColor` clair/sombre, exclusion du manifeste et des icônes dans `proxy.ts` | Sans cette exclusion le manifeste redirigeait vers /connexion (non installable) ; icône relue à l'écran ; pas de captures d'écran dans le manifeste (à ajouter), audit Lighthouse PWA à faire sur build de production |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

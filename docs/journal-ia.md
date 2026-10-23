@@ -27,6 +27,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Dockerfile multi-étapes (prod-01) | `Dockerfile` (deps, build, cible `migrate`, cible `runner`), `.dockerignore`, `output: "standalone"`, script `prisma/create-admin.ts` (le seed efface tout : inutilisable en production) | Image `runner` 246 Mo, utilisateur non root, healthcheck OK, `sw.js` et icônes servis (le standalone ne copie ni `public/` ni `.next/static` : copie explicite). **Piège** : le code utilise `Bun.password`, l'application doit donc tourner sous Bun et non Node. Premier jet de l'image `migrate` : 1,19 Go et refus d'écriture dans `node_modules` (utilisateur non root) → refaite avec seulement Prisma 7.10.1 (versions fixées, car `latest` = Prisma 8), encore 1,14 Go (CLI Prisma), acceptable car exécutée une fois par déploiement. Testé sur un Postgres jetable : migrations, création du compte, `/api/health` |
 
+| 2026-10-23 | docker-compose de production (prod-02) | `docker-compose.prod.yml` (db, migrate one-shot, app, Caddy sur 8082), `Caddyfile`, `.env.production.example`, rotation des logs | Testé en local : migrations puis app saine puis Caddy, `/api/health` et `sw.js` via :8082, seul 8082 exposé (la base n'a aucun port hôte). **`.gitignore` (`.env*`) ignorait aussi `.env.production.example`** : exception ajoutée. Sans domaine, pas de HTTPS : service worker, installation PWA et push inutilisables sur `http://IP:8082` |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

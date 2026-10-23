@@ -1,0 +1,19 @@
+# Reverse proxy devant l'application.
+# Sans nom de domaine, Caddy ne peut pas obtenir de certificat : il sert en HTTP sur le port 8082.
+# Quand un domaine pointera vers le VPS, remplacer `:8082` par `mon-domaine.fr` : Caddy obtient
+# alors tout seul un certificat Let's Encrypt (il faudra publier les ports 80 et 443 dans le compose).
+# HTTPS est requis pour l'installation de la PWA et les notifications push (hors localhost).
+:8082 {
+	encode zstd gzip
+	reverse_proxy app:3000 {
+		# Un client qui coupe la connexion ne doit pas laisser une requête traîner indéfiniment.
+		transport http {
+			response_header_timeout 30s
+		}
+	}
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

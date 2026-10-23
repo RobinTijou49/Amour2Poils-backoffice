@@ -7,7 +7,7 @@
     "build": "bun --bun next build",
     "start": "bun --bun next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bun --bun next typegen && tsc --noEmit",
     "postinstall": "bun --bun prisma generate",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",

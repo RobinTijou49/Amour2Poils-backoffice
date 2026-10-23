@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
+import Link from "next/link";
+import { ButtonLink, focusRing } from "@/components/ui/button";
 import { Avatar, Card, PageHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { ageInYears, daysBetween, formatDate, utcDay } from "@/lib/format";
+import { getCurrentUser } from "@/lib/auth";
 import { getDog } from "@/lib/queries";
 import { bookingStatus } from "@/lib/status";
+import { DeleteDog, DeleteVaccineButton, VaccineForm } from "./dog-forms";
 
 export async function generateMetadata({ params }: PageProps<"/chiens/[id]">): Promise<Metadata> {
   const dog = await getDog((await params).id);
@@ -33,9 +36,10 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 
 async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"] }) {
   const { id } = await params;
-  const dog = await getDog(id);
+  const [dog, user] = await Promise.all([getDog(id), getCurrentUser()]);
   if (!dog) notFound();
   const today = utcDay(new Date());
+  const todayIso = today.toISOString().slice(0, 10);
   const current = dog.bookings.find((b) => b.status === "CHECKED_IN");
   const facts = [
     dog.breed,
@@ -57,9 +61,17 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
         title={dog.name}
         subtitle={facts.join(" · ")}
         actions={
-          <ButtonLink href="/chiens" variant="secondary" icon="chevronGauche">
-            Tous les chiens
-          </ButtonLink>
+          <>
+            <ButtonLink href="/chiens" variant="secondary" icon="chevronGauche">
+              Tous les chiens
+            </ButtonLink>
+            <ButtonLink href={`/chiens/${dog.id}/modifier`} variant="secondary">
+              Modifier
+            </ButtonLink>
+            <ButtonLink href={`/reservations/nouvelle?chien=${dog.id}`} icon="plus">
+              Réserver un séjour
+            </ButtonLink>
+          </>
         }
       />
       <div className="flex flex-wrap gap-2">
@@ -98,8 +110,10 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
                 { header: "Vaccin", cell: (v) => v.name },
                 { header: "Expire le", cell: (v) => formatDate(v.expiresAt) },
                 { header: "Statut", cell: (v) => vaccineStatus(v.expiresAt) },
+                { header: "Action", cell: (v) => <DeleteVaccineButton id={v.id} name={v.name} /> },
               ]}
             />
+            <VaccineForm dogId={dog.id} today={todayIso} />
           </Card>
           <Card title="Séjours">
             <DataTable
@@ -108,7 +122,14 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
               rowKey={(b) => b.id}
               empty="Aucun séjour."
               columns={[
-                { header: "Dates", cell: (b) => `${formatDate(b.startDate, { day: "numeric", month: "short" })} → ${formatDate(b.endDate)}` },
+                {
+                  header: "Dates",
+                  cell: (b) => (
+                    <Link href={`/reservations/${b.id}`} className={`rounded-sm underline ${focusRing}`}>
+                      {`${formatDate(b.startDate, { day: "numeric", month: "short" })} → ${formatDate(b.endDate)}`}
+                    </Link>
+                  ),
+                },
                 { header: "Box", cell: (b) => b.kennel?.name ?? "—" },
                 { header: "Statut", cell: (b) => <Badge tone={bookingStatus[b.status].tone}>{bookingStatus[b.status].label}</Badge> },
               ]}
@@ -116,6 +137,7 @@ async function DogSheet({ params }: { params: PageProps<"/chiens/[id]">["params"
           </Card>
         </div>
       </div>
+      {user.role === "ADMIN" && <DeleteDog id={dog.id} name={dog.name} />}
     </>
   );
 }

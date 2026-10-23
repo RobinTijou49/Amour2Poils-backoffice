@@ -157,6 +157,20 @@ stateDiagram-v2
   `/reservations/[id]` (détail et actions selon le statut, annulation confirmée dans la page), boutons
   « Arrivée » / « Départ » directement dans le tableau de bord.
 
+### Clients, chiens et stock
+
+- **Chiens** : `/chiens/nouveau` et `/chiens/[id]/modifier` partagent un seul formulaire
+  ([`dog-form.tsx`](src/app/(backoffice)/chiens/dog-form.tsx)). Le propriétaire peut être créé dans le même
+  formulaire : une **transaction** Prisma crée le propriétaire et le chien ensemble, ou rien. Numéro de puce et
+  e-mail du client vérifiés avant l'écriture (message sur le bon champ).
+- **Vaccins** ajoutés ou supprimés depuis la fiche ; les vaccins expirés remontent dans les alertes du tableau de bord.
+- **Suppression d'un chien** : gérance uniquement, et refusée s'il a des séjours ou des séances (historique de facturation).
+- **Recherche** `/chiens?q=` : formulaire GET, sans JavaScript, sur le nom du chien ou du propriétaire.
+- **Stock** : `/stock/[id]` enregistre entrées, sorties et inventaires dans une transaction (mouvement + quantité) ;
+  une sortie ne peut pas rendre le stock négatif ; l'historique indique qui a fait chaque mouvement.
+  Création de produit réservée à la gérance.
+- Utilitaires partagés par toutes les actions : [`src/lib/forms.ts`](src/lib/forms.ts).
+
 ### Authentification et rôles
 
 Sessions maison, sans bibliothèque, pour maîtriser et expliquer chaque mécanisme :

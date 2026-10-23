@@ -72,9 +72,13 @@ export async function getWeekPlanning(weekStart: Date) {
   return { kennels, pending, today: utcDay(new Date()) };
 }
 
-export async function getDogs() {
+/** Liste des chiens, filtrée par nom du chien ou du propriétaire si `q` est fourni. */
+export async function getDogs(q?: string) {
   await getCurrentUser();
+  const term = q?.trim();
+  const contains = (field: string) => ({ [field]: { contains: term, mode: "insensitive" as const } });
   return prisma.dog.findMany({
+    where: term ? { OR: [contains("name"), { owner: { OR: [contains("lastName"), contains("firstName")] } }] } : undefined,
     orderBy: { name: "asc" },
     include: {
       owner: true,
@@ -140,4 +144,18 @@ export async function getBooking(id: string) {
     prisma.kennel.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
   ]);
   return { booking, kennels, user };
+}
+
+export async function getOwners() {
+  await getCurrentUser();
+  return prisma.owner.findMany({ orderBy: [{ lastName: "asc" }, { firstName: "asc" }], select: { id: true, firstName: true, lastName: true, phone: true } });
+}
+
+export async function getProduct(id: string) {
+  const user = await getCurrentUser();
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: { movements: { orderBy: { createdAt: "desc" }, take: 20, include: { user: { select: { name: true } } } } },
+  });
+  return { product, user };
 }

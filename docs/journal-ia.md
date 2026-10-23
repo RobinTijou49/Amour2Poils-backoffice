@@ -35,6 +35,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Mise en ligne (prod-04) | Déploiement par GitHub Actions réussi (secrets posés avec `gh`), dossier `~/amour2poils` (le script prévu pour `/opt` exigeait `sudo`), compte gérant créé par SSH avec la clé dédiée, sous-domaine DuckDNS + bloc ajouté au Caddy de `salon2danse` → `https://amour2poils.duckdns.org` | **Erreur de ma part** : j'ai annoncé le port 80 « libre » sans vérifier, il était pris par l'autre projet (corrigé avant toute modification). Le port 8082 est filtré par l'hébergeur : seul chemin = 80/443 via le Caddy existant, après accord explicite. Sauvegarde du `Caddyfile`, `caddy validate` avant `reload`, ancien site revérifié (200). Le mot de passe du VPS avait été collé dans le chat : jamais utilisé, à changer. Certificat Let's Encrypt valide jusqu'au 21/01/2027 |
 
+| 2026-10-23 | Données de test en production | Seed lancé sur le VPS par SSH (mot de passe passé par l'entrée standard) : 5 clients, 5 chiens, 5 réservations, 4 produits, 4 séances, 5 factures ; comptes de démonstration à mot de passe faible volontairement non créés | Base vérifiée **avant** (1 utilisateur, tables vides) car le seed efface tout ; la première tentative a été bloquée par le contrôle de sécurité de Claude Code, relancée après ajout d'une règle par l'utilisateur. Le message final du seed (« 1 employé ») est écrit en dur et faux : un seul compte existe (`admin@admin.fr`). À retirer avant une vraie mise en production |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

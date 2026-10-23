@@ -29,6 +29,16 @@ jobs:
       - run: bun run typecheck
       # Les tests unitaires, d'intégration et E2E seront ajoutés ici (phase 3).
       - run: bun run build
+      - name: Aucun secret dans le code envoyé au navigateur
+        run: |
+          # Le code de .next/static part chez tous les visiteurs : il ne doit jamais citer un secret du serveur.
+          if grep -rlE "VAPID_PRIVATE_KEY|CRON_SECRET|DATABASE_URL|passwordHash" .next/static; then
+            echo "::error::Un secret ou un champ sensible figure dans le code client"; exit 1
+          fi
+          # `next build` copie un éventuel .env dans la sortie autonome : il ne doit jamais finir dans l'image.
+          if find .next/standalone -name ".env*" | grep -q .; then
+            echo "::error::Un fichier .env figure dans .next/standalone"; exit 1
+          fi
 
   images:
     needs: check

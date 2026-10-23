@@ -27,6 +27,7 @@ model User {
   updatedAt      DateTime        @updatedAt
   stockMovements StockMovement[]
   sessions       Session[]
+  pushSubscriptions PushSubscription[]
 }
 
 // Session de connexion. `id` = empreinte SHA-256 du jeton du cookie :
@@ -268,4 +269,18 @@ model InvoiceLine {
   booking        Booking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   enrollmentId   String?
   enrollment     Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+}
+
+// Abonnement Web Push d'un appareil (un utilisateur peut en avoir plusieurs : téléphone, ordinateur).
+// `endpoint` identifie l'appareil chez le service de push du navigateur ; p256dh et auth chiffrent les messages.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

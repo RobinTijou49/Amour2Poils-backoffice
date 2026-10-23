@@ -8,7 +8,7 @@
 //  - tout le reste (API, Server Actions, POST) : jamais intercepté.
 // Les données consultables hors ligne (planning, fiches chiens) sont lues dans IndexedDB par la page /offline.
 
-const VERSION = "v3";
+const VERSION = "v4";
 const STATIC_CACHE = `a2p-static-${VERSION}`;
 const SHELL_CACHE = `a2p-shell-${VERSION}`;
 const OFFLINE_URL = "/offline";
@@ -36,6 +36,37 @@ self.addEventListener("activate", (event) => {
       .keys()
       .then((keys) => Promise.all(keys.filter((k) => ![STATIC_CACHE, SHELL_CACHE].includes(k)).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
+  );
+});
+
+// Notifications push : le serveur envoie { title, body, url, tag } (voir src/lib/push.ts).
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    // Message illisible : on affiche tout de même une notification générique.
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Amour 2 Poils", {
+      body: data.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: data.tag, // une notification de même tag remplace la précédente au lieu de s'empiler
+      data: { url: typeof data.url === "string" && data.url.startsWith("/") ? data.url : "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      // Réutilise un onglet déjà ouvert sur l'application, sinon en ouvre un.
+      const open = windows.find((w) => new URL(w.url).origin === self.location.origin);
+      return open ? open.focus().then((w) => w.navigate(target)) : self.clients.openWindow(target);
+    }),
   );
 });
 

@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { notify } from "@/lib/push";
 
 // Mouvements de stock partagés par la Server Action et l'API.
 
@@ -20,8 +21,8 @@ function nextQuantity(current: number, type: MovementInput["type"], quantity: nu
 }
 
 /** Transaction : le mouvement et la nouvelle quantité sont enregistrés ensemble, ou pas du tout. */
-export function applyMovement(m: MovementInput, userId: string, reason: string | null) {
-  return prisma.$transaction(async (tx) => {
+export async function applyMovement(m: MovementInput, userId: string, reason: string | null) {
+  const result = await prisma.$transaction(async (tx) => {
     const product = await tx.product.findUnique({ where: { id: m.productId } });
     if (!product) return { ok: false, error: "Produit introuvable." } as const;
     const quantity = nextQuantity(product.quantity, m.type, m.quantity);
@@ -30,4 +31,14 @@ export function applyMovement(m: MovementInput, userId: string, reason: string |
     await tx.product.update({ where: { id: product.id }, data: { quantity } });
     return { ok: true, product, quantity } as const;
   });
+  // Une seule alerte au franchissement du seuil (pas à chaque mouvement tant que le stock reste bas).
+  if (result.ok && result.product.quantity > result.product.alertThreshold && result.quantity <= result.product.alertThreshold) {
+    notify({
+      title: "Stock bas",
+      body: `${result.product.name} : ${result.quantity} ${result.product.unit} restant(s) (seuil ${result.product.alertThreshold}).`,
+      url: "/stock",
+      tag: `stock-${result.product.id}`,
+    });
+  }
+  return result;
 }

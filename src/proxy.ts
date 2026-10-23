@@ -13,5 +13,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Tout sauf la connexion, la sonde de santé et les fichiers techniques / statiques.
-  matcher: ["/((?!connexion|api/health|icons|offline|sw.js|manifest.webmanifest|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|ico|webmanifest)$).*)"],
+  matcher: ["/((?!connexion|api/health|api/push/rappels-vaccins|icons|offline|sw.js|manifest.webmanifest|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|ico|webmanifest)$).*)"],
 };

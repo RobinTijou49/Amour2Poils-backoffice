@@ -3,6 +3,7 @@ import { z } from "zod";
 import { hasRoom } from "@/lib/bookings";
 import { utcDay } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { notify } from "@/lib/push";
 
 // Règles d'écriture des réservations partagées par les Server Actions (formulaires) et les Route Handlers (API).
 
@@ -34,9 +35,11 @@ export async function kennelHasRoom(kennelId: string, start: Date, end: Date, ex
   return hasRoom(kennel.capacity, others.map((b) => ({ start: b.startDate, end: b.endDate })), { start, end });
 }
 
-/** Crée la réservation : confirmée si une box est choisie, sinon en attente. */
-export function createBookingRecord(d: z.output<typeof bookingInput>) {
-  return prisma.booking.create({
+const shortDay = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" });
+
+/** Crée la réservation : confirmée si une box est choisie, sinon en attente. Prévient l'équipe par notification. */
+export async function createBookingRecord(d: z.output<typeof bookingInput>) {
+  const booking = await prisma.booking.create({
     data: {
       dogId: d.dogId,
       kennelId: d.kennelId,
@@ -46,5 +49,13 @@ export function createBookingRecord(d: z.output<typeof bookingInput>) {
       notes: d.notes || null,
       status: d.kennelId ? "CONFIRMED" : "PENDING",
     },
+    include: { dog: { select: { name: true } } },
   });
+  notify({
+    title: "Nouvelle réservation",
+    body: `${booking.dog.name} · du ${shortDay(d.startDate)} au ${shortDay(d.endDate)}${booking.status === "PENDING" ? " (box à attribuer)" : ""}.`,
+    url: `/reservations/${booking.id}`,
+    tag: `resa-${booking.id}`,
+  });
+  return booking;
 }

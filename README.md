@@ -237,13 +237,13 @@ L'application tourne dans trois conteneurs (`docker-compose.prod.yml`) : Caddy (
 
 **Mise en place (une seule fois)**
 
-1. Sur le poste : `deploy/vps-bootstrap.sh` et `.env.production` (généré en local, jamais commité) sont copiés sur le VPS, puis le script est lancé : il vérifie Docker et le port, crée `/opt/amour2poils`, installe `.env.production` (droits 600) et autorise la clé de déploiement.
+1. Sur le poste : `deploy/vps-bootstrap.sh` et `.env.production` (généré en local, jamais commité) sont copiés sur le VPS, puis le script est lancé : il vérifie Docker et le port, crée le dossier de déploiement, installe `.env.production` (droits 600) et autorise la clé de déploiement.
 2. Dans GitHub (Settings, Secrets and variables, Actions) : `SSH_HOST`, `SSH_USER`, `SSH_KEY` (clé privée dédiée), et si besoin `SSH_PORT`. Créer l'environnement `production`.
 3. Un push sur `main` lance : lint, typecheck, build, publication des images, déploiement, contrôle de `/api/health`.
 4. Premier compte gérant (le seed efface tout, il n'est pas utilisable en production) :
 
 ```bash
-cd /opt/amour2poils
+cd ~/amour2poils
 docker compose -f docker-compose.prod.yml --env-file .env.production run --rm   -e ADMIN_EMAIL=... -e ADMIN_NAME=... -e ADMIN_PASSWORD=... migrate bun prisma/create-admin.ts
 ```
 

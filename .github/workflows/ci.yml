@@ -86,7 +86,8 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
-      DEPLOY_DIR: /opt/amour2poils
+      # Dans le dossier personnel de l'utilisateur SSH : aucun droit root nécessaire.
+      DEPLOY_DIR: amour2poils
     steps:
       - uses: actions/checkout@v4
       - name: Vérifier les secrets

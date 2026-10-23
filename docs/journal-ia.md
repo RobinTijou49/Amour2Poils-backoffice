@@ -33,6 +33,8 @@ ce qui a été demandé, ce que l'IA a produit, et ce qui a été vérifié ou c
 
 | 2026-10-23 | Préparation du déploiement (prod-04) | Clé SSH dédiée `~/.ssh/amour2poils_deploy`, `.env.production` aux secrets générés (ignoré par Git), `deploy/vps-bootstrap.sh`, section Déploiement du README | **L'utilisateur a collé le mot de passe du VPS dans le chat et m'a demandé de m'y connecter** : refusé (je ne saisis pas de mot de passe pour m'authentifier) ; mot de passe à changer car exposé dans la conversation. Choix : déploiement par GitHub Actions avec clé dédiée, que l'utilisateur autorise lui-même. Script validé (`bash -n`), non exécuté sur le VPS |
 
+| 2026-10-23 | Mise en ligne (prod-04) | Déploiement par GitHub Actions réussi (secrets posés avec `gh`), dossier `~/amour2poils` (le script prévu pour `/opt` exigeait `sudo`), compte gérant créé par SSH avec la clé dédiée, sous-domaine DuckDNS + bloc ajouté au Caddy de `salon2danse` → `https://amour2poils.duckdns.org` | **Erreur de ma part** : j'ai annoncé le port 80 « libre » sans vérifier, il était pris par l'autre projet (corrigé avant toute modification). Le port 8082 est filtré par l'hébergeur : seul chemin = 80/443 via le Caddy existant, après accord explicite. Sauvegarde du `Caddyfile`, `caddy validate` avant `reload`, ancien site revérifié (200). Le mot de passe du VPS avait été collé dans le chat : jamais utilisé, à changer. Certificat Let's Encrypt valide jusqu'au 21/01/2027 |
+
 ## Points d'attention relevés
 
 - `bun add -d prisma` installait par défaut Prisma 8.0 en *release candidate* (tag `latest`), incompatible avec le client 7.10.1.

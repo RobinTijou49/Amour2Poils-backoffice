@@ -93,6 +93,34 @@ Les montants sont en centimes (`Int`) pour éviter les erreurs d'arrondi des nom
 
 ---
 
+## Phase 2 · Maquette Figma
+
+Maquette : <https://www.figma.com/design/2ju0WFXMpBtETVELEKz6Ee>
+
+| Page Figma | Contenu |
+|---|---|
+| **Design system** | Palette clair / sombre avec ratios de contraste, échelle typographique, 17 icônes, composants (Bouton, Champ, Badge, Élément de menu, Carte KPI, Avatar chien, Barre latérale) |
+| **Écrans · Desktop** (1440 × 900) | Connexion, Tableau de bord, Réservations (planning des boxes), Fiche chien, Stock, Facturation, Séances |
+| **Écrans · Mobile** (390 × 844) | Journée en mode hors connexion, Enregistrement d'une arrivée, Fiche chien |
+
+**Choix de design**
+
+- La DA du site vitrine est conservée (crème, sauge, brun, Quicksand + Nunito). Les variables Figma portent
+  les mêmes noms que les variables CSS de [`globals.css`](src/app/globals.css) : la maquette et le code
+  partagent une seule source de tokens.
+- **Contraste** : le vert sauge du site (`#6f7f64`) n'atteint que 4,2:1 sur le fond, sous le seuil AA de 4,5:1.
+  Le back-office utilise un `primary` assombri (`#5f6e55`, 5,3:1 ; texte blanc dessus 5,5:1). Tous les couples
+  texte / fond de statut dépassent 5:1. La bordure des champs (`border-strong`) atteint 3:1 (WCAG 1.4.11).
+- **Accessibilité intégrée dès la maquette** : boutons et champs de 44 px de haut (WCAG 2.5.8), étiquettes
+  toujours visibles, statuts écrits en toutes lettres et pas seulement en couleur (WCAG 1.4.1), onglet actif
+  signalé par un fond et pas seulement par la couleur du texte.
+- **Mobile terrain** : les écrans mobiles anticipent la PWA (bandeau hors connexion, arrivée enregistrée
+  sans réseau puis synchronisée).
+- **Limites du plan Figma gratuit** : 3 pages maximum et un seul mode par collection de variables.
+  Le thème sombre est donc une seconde collection « Couleurs · Sombre » au lieu d'un mode.
+
+---
+
 ## Lancer le projet
 
 Prérequis : [Bun](https://bun.sh) ≥ 1.4 et Docker Desktop.

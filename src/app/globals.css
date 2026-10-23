@@ -1,44 +1,85 @@
 @import "tailwindcss";
 
-/* Design tokens repris du site vitrine (robintijou49.github.io/Amour2Poils). */
+/* Design tokens : mêmes noms que les variables de la maquette Figma
+   (collections « Couleurs · Clair » et « Couleurs · Sombre »).
+   Base reprise du site vitrine (robintijou49.github.io/Amour2Poils).
+   `primary` est un vert sauge assombri : le sauge du site (#6f7f64) n'atteint
+   que 4,2:1 sur le fond, sous le seuil AA de 4,5:1 pour du texte. */
 :root {
   --background: #fdfcf9;
   --background-alt: #f5f1e8;
+  --surface: #ffffff;
   --foreground: #3d3a34;
   --foreground-light: #6b6559;
   --border: #e6e0d4;
+  --border-strong: #9a9284;
+  --primary: #5f6e55;
+  --on-primary: #ffffff;
   --sage: #8a9a7e;
-  --sage-dark: #6f7f64;
+  --sage-soft: #e3e8dd;
   --brown: #a9825f;
   --brown-dark: #8a6845;
+  --success-bg: #e3e8dd;
+  --success-fg: #4f5d45;
+  --warning-bg: #f6ead2;
+  --warning-fg: #7a5a1c;
+  --danger-bg: #f3dcd5;
+  --danger-fg: #9a3a28;
+  --info-bg: #e2e8ec;
+  --info-fg: #44606f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #1d1c19;
     --background-alt: #26241f;
+    --surface: #2a2823;
     --foreground: #ece7dc;
     --foreground-light: #b3ab9b;
     --border: #3d3a33;
+    --border-strong: #857e70;
+    --primary: #a9b99c;
+    --on-primary: #1d1c19;
     --sage: #a9b99c;
-    --sage-dark: #c1cfb5;
+    --sage-soft: #333a2e;
     --brown: #d2ac85;
     --brown-dark: #e2c3a2;
+    --success-bg: #333a2e;
+    --success-fg: #c1cfb5;
+    --warning-bg: #3d3220;
+    --warning-fg: #e8c98a;
+    --danger-bg: #43271f;
+    --danger-fg: #f0a491;
+    --info-bg: #26323a;
+    --info-fg: #a9c3d1;
   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-background-alt: var(--background-alt);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-foreground-light: var(--foreground-light);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-sage: var(--sage);
-  --color-sage-dark: var(--sage-dark);
+  --color-sage-soft: var(--sage-soft);
   --color-brown: var(--brown);
   --color-brown-dark: var(--brown-dark);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-fg: var(--warning-fg);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-fg: var(--danger-fg);
+  --color-info-bg: var(--info-bg);
+  --color-info-fg: var(--info-fg);
   --font-sans: var(--font-nunito);
   --font-heading: var(--font-quicksand);
+  --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 26px;
 }

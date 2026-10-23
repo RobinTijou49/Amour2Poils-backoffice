@@ -9,7 +9,7 @@ Back-office d'une pension canine (TP M1 Front-end avancé). Voir README.md pour 
 - Next.js 16 App Router, TypeScript strict, `cacheComponents` activé. Lire `node_modules/next/dist/docs/` avant d'utiliser une API Next.
 - Runtime Bun : toujours `bun` / `bunx`, jamais npm. Les scripts Next et Prisma passent par `bun --bun` pour que `.env` soit chargé.
 - PostgreSQL (Docker, port hôte 5433) + Prisma 7 avec `@prisma/adapter-pg`. Client généré dans `src/generated/prisma`, importé via `@/generated/prisma/client`.
-- Tailwind CSS 4, tokens de la DA dans `src/app/globals.css` (`sage`, `brown`, `background-alt`, `font-heading`…). Ne pas introduire d'autres couleurs.
+- Tailwind CSS 4, tokens de la DA dans `src/app/globals.css` (`primary`, `surface`, `sage-soft`, statuts `success|warning|danger|info-bg|fg`…), identiques aux variables de la maquette Figma. Ne pas introduire d'autres couleurs.
 
 ## Commandes
 

@@ -51,3 +51,12 @@ next-env.d.ts
 /playwright-report/
 /test-results/
 /blob-report/
+
+# Application Android (TWA) : projet généré, APK et clés de signature ne vont jamais dans le dépôt.
+/twa/*
+!/twa/twa-manifest.json
+!/twa/README.md
+*.keystore
+*.jks
+*.apk
+*.aab

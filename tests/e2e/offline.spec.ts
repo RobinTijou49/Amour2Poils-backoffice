@@ -81,6 +81,17 @@ test.describe("installable", () => {
     }
   });
 
+  test("l'application Android (TWA) est reliée au site : assetlinks.json public, en JSON, sans redirection", async ({ request }) => {
+    // Android n'ouvre la TWA sans barre d'adresse que si ce fichier répond 200 SANS connexion (pas de redirection vers /connexion).
+    const res = await request.get("/.well-known/assetlinks.json", { maxRedirects: 0 });
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("application/json");
+    const [link] = await res.json();
+    expect(link.relation).toContain("delegate_permission/common.handle_all_urls");
+    expect(link.target).toMatchObject({ namespace: "android_app", package_name: "fr.amour2poils.backoffice" });
+    expect(link.target.sha256_cert_fingerprints[0]).toMatch(/^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
+  });
+
   test("le service worker s'enregistre en HTTPS-équivalent (localhost) et prend le contrôle de la page", async ({ page }) => {
     await page.goto("/connexion");
     await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.getRegistration())?.active?.state ?? "aucun"), { timeout: 15_000 }).toBe("activated");

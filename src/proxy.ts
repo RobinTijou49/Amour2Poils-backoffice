@@ -44,7 +44,7 @@ export const config = {
   // Les préchargements (next/link) sont ignorés : ils n'exécutent aucun script et le nonce serait gaspillé.
   matcher: [
     {
-      source: "/((?!_next/static|_next/image|favicon.ico|sw.js|icons|manifest.webmanifest|.*\\.(?:svg|png|jpg|ico|webmanifest)$).*)",
+      source: "/((?!_next/static|_next/image|favicon.ico|sw.js|icons|manifest.webmanifest|[.]well-known|.*\\.(?:svg|png|jpg|ico|webmanifest)$).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

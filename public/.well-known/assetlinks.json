@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "fr.amour2poils.backoffice",
+      "sha256_cert_fingerprints": ["B6:66:E9:5B:59:CD:A6:56:1C:A1:32:79:EC:45:C4:A3:99:1F:43:86:31:85:4F:9D:02:1A:B5:54:98:CE:C5:6D"]
+    }
+  }
+]

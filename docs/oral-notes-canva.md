@@ -40,17 +40,25 @@ Du plus simple au plus lourd : un lien pour la PWA, le Play Store pour la TWA, l
 PWA : le site, plus un manifeste et un service worker. Un seul code, mise à jour immédiate, zéro euro. TWA : une application Android minimale qui affiche mon site dans Chrome en plein écran, sans barre d'adresse. Elle n'ajoute aucune capacité, elle ajoute de la distribution.
 ⚠ Le lien de confiance de la TWA est en ligne et Google le reconnaît, mais je n'ai pas construit l'application ni testé sur Android. Compte Play Store : 25 dollars, une fois, seulement pour publier.
 
-## Diapo 6 · Hybride avec Capacitor (0:40)
+## Diapo 6 · Hybride : à quoi ça sert concrètement (0:40)
 
-Hybride : une application mobile qui contient mon site dans une WebView, un navigateur intégré. Des plugins font le pont avec le téléphone : caméra, fichiers, GPS, Bluetooth, NFC, biométrie, notifications natives. On réutilise environ 95 % du code. Coût : 99 dollars par an chez Apple, 25 chez Google, plus la revue par les stores. C'est la voie logique si une API Web manque.
+L'hybride, c'est une vraie application mobile, publiée sur l'App Store et le Play Store, qui contient mon site à l'intérieur, plus des « ponts » vers le téléphone. On le choisit quand la PWA ne suffit plus, pour trois raisons concrètes.
+Un : le matériel. Caméra et scanner avancés, Bluetooth pour un capteur, NFC pour lire une puce, biométrie, fichiers. Chez nous : lire la puce d'un chien sur iPhone, ce que le navigateur ne sait pas faire.
+Deux : la fiabilité sur iPhone. Notifications natives sans dépendre de l'installation depuis Safari, et fonctionnement en arrière-plan.
+Trois : la visibilité. L'application est sur les stores, avec son icône et ses mises à jour.
+Par rapport à la PWA : plus de pouvoir, mais un coût, 99 dollars par an chez Apple, 25 chez Google, et une revue par les stores. Par rapport à la TWA : la TWA reste limitée à ce que Chrome sait faire et n'existe pas sur iPhone ; l'hybride, si. Et on réutilise environ 95 % du code web.
+Les noms d'outils sont sur la diapositive : inutile de les détailler.
 
-## Diapo 7 · Desktop avec Electron ou Tauri (0:40)
+## Diapo 7 · Desktop : à quoi ça sert concrètement (0:40)
 
-Une application d'ordinateur qui affiche le site, avec accès à ce que le navigateur interdit : fichiers, imprimante, USB, démarrage automatique. Electron embarque Chromium, environ 100 mégaoctets : c'est ce qu'utilisent Visual Studio Code, Slack et Discord. Tauri utilise le navigateur du système avec du Rust, environ 5 mégaoctets. Aucun besoin ici : le navigateur suffit.
+Le desktop, c'est un vrai logiciel pour ordinateur qui affiche mon site, installé comme n'importe quel programme. On le choisit quand l'application doit toucher à l'ordinateur lui-même, ce que le navigateur limite ou interdit.
+Concrètement : lire et écrire des fichiers sur le disque, piloter une imprimante, brancher un appareil USB comme un lecteur de puces ou de codes-barres, se lancer au démarrage de l'ordinateur, rester actif en arrière-plan avec une icône dans la barre système.
+Par rapport à la PWA installée sur ordinateur : elle a déjà sa fenêtre, le hors ligne et les notifications, mais elle ne touche pas au système. Le desktop, si, au prix d'un fichier à installer par système, d'une signature du code payante et de mises à jour à gérer.
+Pour une pension : aucun besoin. Le navigateur de la gérante suffit, et c'est justement l'avantage de la PWA.
 
 ## Diapo 8 · Comparaison (0:40)
 
-Ne pas tout lire. Trois lignes à retenir : le code réutilisé, 100 % pour la PWA et la TWA, environ 95 % pour l'hybride. Le coût d'entrée : 0 euro, 25 dollars une fois, 99 dollars par an. Et le point qui compte : la PWA seule s'arrête là où commence l'hybride, sur iPhone.
+Ne pas tout lire. Trois lignes à retenir : le code réutilisé, 100 % pour la PWA et la TWA, environ 95 % pour l'hybride. Le coût d'entrée : 0 euro, 25 dollars une fois, 99 dollars par an. Et le point qui compte : la PWA, la TWA et l'hybride se distinguent par ce qu'elles donnent en plus : la distribution pour la TWA, le matériel et l'iPhone pour l'hybride, le système de l'ordinateur pour le desktop.
 
 ## Diapo 9 · Limites sur iPhone (0:40)
 

@@ -46,6 +46,8 @@ mais le code HTTP était trompeur ; il est maintenant exact.
 | `GET /api/push/cle` | oui | tous | clé publique seulement |
 | `POST`, `DELETE /api/push/abonnement` | oui | tous | origine, JSON, Zod (URL https), suppression limitée à ses propres abonnements |
 | `POST /api/push/rappels-vaccins` | **secret** `CRON_SECRET` | n/a | comparaison en temps constant, secret ≥ 24 caractères (validé au démarrage) |
+| `POST /api/demo/passkeys/{inscription,authentification}/{options,verification}` | oui | **gérance** | origine, JSON, Zod, défi à usage unique de 5 min, passkey limitée au compte connecté, signature vérifiée par `@simplewebauthn/server` |
+| `POST /api/demo/paiement/{intention,confirmation}` | oui | **gérance** | passkey de moins de 2 min exigée, montant décidé et revérifié côté serveur, jeton opaque non stocké, facture jamais modifiée (démonstration) |
 | `POST /api/csp-report` | publique | n/a | corps ≤ 8 Ko, champs tronqués, rien de stocké |
 | `GET /api/health` | publique | n/a | ne renvoie que `ok` / `down` |
 

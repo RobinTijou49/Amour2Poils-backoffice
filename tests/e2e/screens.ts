@@ -40,5 +40,6 @@ export const SCREENS: Screen[] = [
   { name: "nouveau produit", open: go("/stock/nouveau") },
   { name: "facturation", open: go("/facturation") },
   { name: "fiche d'une facture", open: openFirst("/facturation", "/facturation/") },
+  { name: "démonstration paiement", open: go("/demo/paiement") },
   { name: "page hors connexion", open: go("/offline") },
 ];

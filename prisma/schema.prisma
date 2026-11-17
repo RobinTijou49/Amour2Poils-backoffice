@@ -28,6 +28,8 @@ model User {
   stockMovements StockMovement[]
   sessions       Session[]
   pushSubscriptions PushSubscription[]
+  passkeys       Passkey[]
+  passkeyChallenge PasskeyChallenge?
 }
 
 // Session de connexion. `id` = empreinte SHA-256 du jeton du cookie :
@@ -283,4 +285,29 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// Passkey (WebAuthn) d'un utilisateur : l'empreinte ou le visage ne quittent jamais l'appareil, le serveur ne garde que la
+// CLÉ PUBLIQUE et un compteur. `credentialId` identifie la clé chez l'appareil. Démonstration de l'oral (/demo/paiement).
+model Passkey {
+  id           String    @id @default(cuid())
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      Int       @default(0)
+  transports   String[]
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([userId])
+}
+
+// Défi en attente (un seul par utilisateur) : un défi n'est valable qu'une fois et quelques minutes (anti-rejeu).
+model PasskeyChallenge {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge String
+  purpose   String // "register" | "authenticate"
+  expiresAt DateTime
 }

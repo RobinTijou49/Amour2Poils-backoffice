@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Démonstration de l'oral (Payment Request) : le paiement est coupé partout, sauf sur cette page, pour notre propre
+        // origine seulement (jamais pour un iframe tiers). Un en-tête plus bas dans la liste remplace celui de `/:path*`.
+        source: "/demo/:path*",
+        headers: [{ key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(self), usb=(), interest-cohort=()" }],
+      },
+      {
         // Le navigateur doit toujours revérifier le service worker, sinon une mise à jour peut rester bloquée.
         source: "/sw.js",
         headers: [

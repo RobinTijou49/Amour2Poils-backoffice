@@ -267,16 +267,25 @@ Détail et décisions dans [docs/journal-ia.md](docs/journal-ia.md) ; audit des 
 | **Autorisation** | Session et rôle revérifiés dans chaque action et chaque route ; pages gérance en vrai 403 ; mots de passe argon2id ; 5 échecs / 15 min par e-mail. |
 | **Dépendances** | `bun audit` bloquant en CI (une exception justifiée et datée) ; Dependabot hebdomadaire (bun, GitHub Actions, Docker) et alertes de sécurité activées ; *secret scanning* et protection au push activés. |
 
+## Démonstration : paiement sécurisé (oral, thème 6)
+
+Page `/demo/paiement` (gérance seulement, vrai 403 pour un employé) qui montre deux briques d'un paiement sécurisé dans une PWA :
+
+1. **Passkey (WebAuthn)** : l'appareil vérifie la personne (empreinte, visage ou code) et signe un défi du serveur. Le serveur ne garde que la **clé publique** et un compteur (tables `Passkey` et `PasskeyChallenge`). Défi à usage unique, valable 5 minutes, lié au domaine (hameçonnage impossible). Vérification cryptographique par `@simplewebauthn/server`.
+2. **Payment Request API** : le serveur décide du montant (centimes, calculé depuis les lignes de la facture) **seulement après une passkey de moins de 2 minutes** ; le navigateur affiche sa feuille de paiement (Google Pay en mode TEST, passerelle factice) et ne rend qu'un jeton ; le serveur recompare le montant à la confirmation.
+
+**C'est une démonstration** : aucun débit, aucune facture modifiée (`/api/demo/paiement/confirmation` ne fait que vérifier). Le paiement en ligne reste non prévu dans l'application. Limites : la feuille de paiement dépend d'un portefeuille présent sur l'appareil (non testable dans le Chromium de test : l'échec est expliqué à l'utilisateur) ; Web NFC n'est pas implémenté (Chrome Android seulement, ne lit pas les cartes bancaires). Sur le site en production, la passkey se crée sur `amour2poils.duckdns.org` (HTTPS obligatoire).
+
 ## Tests
 
-Quatre suites, toutes branchées en CI (`.github/workflows/ci.yml`). Total : 517 tests.
+Quatre suites, toutes branchées en CI (`.github/workflows/ci.yml`). Total : 751 tests.
 
 | Commande | Suite | Ce qu'elle exerce |
 |---|---|---|
-| `bun run test` | **Unitaires** (`src/**/*.test.ts`, 221 tests, ~0,2 s) | Règles métier pures, schémas Zod, dates, sécurité (CSRF, CSP, garde d'API), synchronisation hors ligne. Aucune base. |
-| `bun run test:db` puis `bun run test:int` | **Intégration** (`tests/integration`, 164 tests, ~15 s) | Les vrais Route Handlers et Server Actions, branchés sur une **vraie base PostgreSQL de test** : droits, validation, transactions, notifications, **accès simultanés**. |
+| `bun run test` | **Unitaires** (`src/**/*.test.ts`, 232 tests, ~0,2 s) | Règles métier pures, schémas Zod, dates, sécurité (CSRF, CSP, garde d'API), synchronisation hors ligne. Aucune base. |
+| `bun run test:db` puis `bun run test:int` | **Intégration** (`tests/integration`, 202 tests, ~15 s) | Les vrais Route Handlers et Server Actions, branchés sur une **vraie base PostgreSQL de test** : droits, validation, transactions, notifications, **accès simultanés**. |
 | `bun run test:components` | **Composants** (`tests/components`, 66 tests) | Testing Library + happy-dom : étiquettes et annonces pour lecteurs d'écran, formulaires, bouton de notifications, page hors connexion. |
-| `bun run test:e2e` | **Bout en bout** (`tests/e2e`, 202 tests dont 136 d'accessibilité, ~8 min) | Un vrai **Chromium** (Playwright) pilote la construction de production sur une base dédiée `amour2poils_e2e_test` : connexion, rôles, réservation, accueil, stock, facture, **mode hors connexion avec service worker**, CSP, **accessibilité** (axe WCAG 2.2 AA sur 17 écrans en clair, sombre et téléphone, clavier, focus, cibles, reflow, annonces). Premier lancement : `bunx playwright install chromium`. Rapport : `bunx playwright show-report`. |
+| `bun run test:e2e` | **Bout en bout** (`tests/e2e`, 221 tests dont 143 d'accessibilité, ~8 min) | Un vrai **Chromium** (Playwright) pilote la construction de production sur une base dédiée `amour2poils_e2e_test` : connexion, rôles, réservation, accueil, stock, facture, **mode hors connexion avec service worker**, CSP, **accessibilité** (axe WCAG 2.2 AA sur 17 écrans en clair, sombre et téléphone, clavier, focus, cibles, reflow, annonces). Premier lancement : `bunx playwright install chromium`. Rapport : `bunx playwright show-report`. |
 | `bun run coverage` | **Couverture** des trois suites fusionnées | Tableau par dossier, échec sous 80 % des lignes (`COVERAGE_MIN_LINES`). Affiché dans la CI (page du run) avec le lcov en artefact. Les pages et formulaires jamais chargés par ces suites (vérifiés par les E2E) sont listés à part, non mesurés. |
 | `bun run test:all` | Unitaires, intégration et composants (pas le E2E, plus lent) | |
 

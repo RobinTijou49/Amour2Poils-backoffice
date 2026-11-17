@@ -4,7 +4,7 @@ export function Card({ title, children, className, action }: { title?: string; c
   return (
     <section className={`flex min-w-0 flex-col gap-4 rounded-md border border-border bg-surface p-5 ${className ?? ""}`}>
       {(title || action) && (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {title && <h2 className="text-lg font-bold">{title}</h2>}
           {action}
         </div>

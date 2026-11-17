@@ -49,15 +49,19 @@ jobs:
         run: bun audit --audit-level=high --ignore GHSA-vfj7-8cjw-p6xm
       - run: bun run lint
       - run: bun run typecheck
-      - name: Tests unitaires
-        run: bun run test
-      - name: Préparer la base de test (migrations)
-        run: bun run test:db
-      - name: Tests d'intégration (Route Handlers, Server Actions, concurrence)
-        run: bun run test:int
-      - name: Tests de composants (Testing Library)
-        run: bun run test:components
-      # Les tests E2E (Playwright) s'ajouteront ici (tst-08).
+      - name: Tests unitaires, d'intégration et de composants, avec couverture
+        # `bun run coverage` prépare la base de test, lance les trois suites (elles échouent si un test échoue), fusionne
+        # leur couverture, l'affiche en tableau sur la page du run et échoue sous 80 % des lignes des fichiers chargés.
+        run: bun run coverage
+      - name: Rapport de couverture (lcov)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couverture
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
+      # Les tests E2E (Playwright) tournent dans le job `e2e`.
       - run: bun run build
       - name: Aucun secret dans le code envoyé au navigateur
         run: |

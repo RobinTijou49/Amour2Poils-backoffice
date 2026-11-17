@@ -1,3 +1,5 @@
 # Configuration de `bun test` (tests unitaires, voir tests/setup.ts).
 [test]
 preload = ["./tests/setup.ts"]
+# Couverture : le client Prisma généré et les tests eux-mêmes ne comptent pas.
+coveragePathIgnorePatterns = ["src/generated/**", "tests/**"]

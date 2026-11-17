@@ -23,6 +23,7 @@
     "db:migrate": "bun --bun prisma migrate dev",
     "db:generate": "bun --bun prisma generate",
     "db:seed": "bun --bun prisma db seed",
+    "db:seed:extra": "bun --bun prisma/seed-extra.ts",
     "db:reset": "bun --bun prisma migrate reset",
     "db:studio": "bun --bun prisma studio"
   },

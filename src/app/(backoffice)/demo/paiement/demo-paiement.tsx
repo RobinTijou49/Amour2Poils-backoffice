@@ -16,15 +16,29 @@ type Feedback = { status?: string; error?: string };
 // Libellés longs : sur un écran de 320 px ils doivent passer à la ligne au lieu de faire défiler la page (WCAG 1.4.10).
 const wrapButton = "w-full whitespace-normal! py-2 text-center sm:w-auto";
 
-type Support = { webauthn: boolean; paymentRequest: boolean };
+type Support = { webauthn: boolean; paymentRequest: boolean; applePay: boolean };
 let cachedSupport: Support | null = null;
 // useSyncExternalStore exige un instantané STABLE tant que rien ne change : on ne renvoie un nouvel objet que si une valeur change.
 const readSupport = (): Support => {
-  const next = { webauthn: browserSupportsWebAuthn(), paymentRequest: "PaymentRequest" in window };
-  if (!cachedSupport || cachedSupport.webauthn !== next.webauthn || cachedSupport.paymentRequest !== next.paymentRequest) cachedSupport = next;
+  const next = { webauthn: browserSupportsWebAuthn(), paymentRequest: "PaymentRequest" in window, applePay: canApplePay() };
+  if (!cachedSupport || cachedSupport.webauthn !== next.webauthn || cachedSupport.paymentRequest !== next.paymentRequest || cachedSupport.applePay !== next.applePay) cachedSupport = next;
   return cachedSupport;
 };
 const subscribeNever = () => () => {};
+
+/** Apple Pay existe sur l'iPhone (Safari), mais l'utiliser exige un compte Apple Developer : on le détecte pour l'expliquer. */
+function canApplePay() {
+  try {
+    const session = (window as unknown as { ApplePaySession?: { canMakePayments(): boolean } }).ApplePaySession;
+    return Boolean(session?.canMakePayments());
+  } catch {
+    return false;
+  }
+}
+
+const NO_WALLET = "Aucun portefeuille compatible (Google Pay) n'est disponible sur cet appareil.";
+const APPLE_PAY_ONLY =
+  "Cet iPhone propose Apple Pay, que cette démonstration n'a pas branché : il exige un compte Apple Developer (99 $/an) et la validation du commerce par Apple. Google Pay (Chrome sur ordinateur ou sur Android) fonctionne en mode test.";
 
 async function postJson<T = unknown>(url: string, body: unknown = {}): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   try {
@@ -68,6 +82,8 @@ export function DemoPaiement({ passkeys: initialPasskeys, invoices }: { passkeys
   const [invoiceId, setInvoiceId] = useState(invoices[0]?.id ?? "");
   const [intent, setIntent] = useState<Intent | null>(null);
   const [payFeedback, setPayFeedback] = useState<Feedback>({});
+  // Vrai quand la feuille de paiement réelle est impossible sur cet appareil : on propose alors la simulation.
+  const [walletUnavailable, setWalletUnavailable] = useState(false);
   // Ce que le navigateur sait faire n'est connu que côté client : le serveur rend « null » (« Détection… »), puis le client
   // lit les capacités sans passer par un état mis à jour dans un effet.
   const support = useSyncExternalStore(subscribeNever, readSupport, () => null);
@@ -147,7 +163,8 @@ export function DemoPaiement({ passkeys: initialPasskeys, invoices }: { passkeys
       const request = new PaymentRequest([GOOGLE_PAY_METHOD], paymentDetails(intent.amountCents, intent.number));
       if (!(await request.canMakePayment())) {
         setBusy(null);
-        return setPayFeedback({ error: "Aucun portefeuille compatible (Google Pay) n'est disponible sur cet appareil." });
+        setWalletUnavailable(true);
+        return setPayFeedback({ error: `${support?.applePay ? APPLE_PAY_ONLY : NO_WALLET} Vous pouvez simuler le paiement ci-dessous.` });
       }
       // La feuille de paiement est dessinée par le NAVIGATEUR : notre page n'y voit ni ne touche rien.
       const response = await request.show();
@@ -160,18 +177,48 @@ export function DemoPaiement({ passkeys: initialPasskeys, invoices }: { passkeys
       setPayFeedback(confirmation.ok ? { status: `Jeton reçu et vérifié par le serveur. ${confirmation.data.message}` } : { error: confirmation.error });
     } catch (error) {
       const name = error instanceof Error ? error.name : "";
-      setPayFeedback({ error: name === "AbortError" || name === "NotAllowedError" ? "Paiement annulé." : "La feuille de paiement n'a pas pu s'ouvrir sur cet appareil." });
+      if (name === "NotSupportedError") {
+        // Safari refuse un moyen de paiement qu'il ne connaît pas (ici Google Pay) en levant cette erreur au lieu de répondre « faux ».
+        setWalletUnavailable(true);
+        setPayFeedback({ error: `${support?.applePay ? APPLE_PAY_ONLY : NO_WALLET} Vous pouvez simuler le paiement ci-dessous.` });
+      } else if (name === "AbortError" || name === "NotAllowedError") {
+        setPayFeedback({ error: "Paiement annulé." });
+      } else {
+        setWalletUnavailable(true);
+        setPayFeedback({ error: "La feuille de paiement n'a pas pu s'ouvrir sur cet appareil. Vous pouvez simuler le paiement ci-dessous." });
+      }
     }
     setBusy(null);
   }
 
+  /** Sans portefeuille : même parcours côté serveur (montant décidé, vérifié), mais AUCUN jeton réel. Étiqueté « simulation » partout. */
+  async function simulate() {
+    if (!intent) return;
+    setBusy("pay");
+    setPayFeedback({});
+    const confirmation = await postJson<{ message: string }>("/api/demo/paiement/confirmation", {
+      invoiceId: intent.invoiceId,
+      amountCents: intent.amountCents,
+      token: "simulation-sans-portefeuille",
+    });
+    setPayFeedback(
+      confirmation.ok
+        ? { status: `Simulation : le serveur a revérifié le montant (${formatEuros(intent.amountCents)}). Aucun portefeuille ni jeton réel. ${confirmation.data.message}` }
+        : { error: confirmation.error },
+    );
+    setBusy(null);
+  }
+
+  const canSimulate = intent !== null && (walletUnavailable || support?.paymentRequest === false);
+
   return (
     <div className="flex flex-col gap-6">
       <Card title="Ce que cet appareil sait faire">
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Capacités détectées">
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Capacités détectées">
           <Capability label="WebAuthn (passkeys)" value={support === null ? null : support.webauthn} />
           <Capability label="Empreinte, visage ou code de l'appareil" value={support === null || platform === null ? null : support.webauthn && platform} />
           <Capability label="Payment Request API" value={support === null ? null : support.paymentRequest} />
+          <Capability label="Apple Pay (iPhone, non branché ici)" value={support === null ? null : support.applePay} />
         </dl>
       </Card>
 
@@ -218,6 +265,11 @@ export function DemoPaiement({ passkeys: initialPasskeys, invoices }: { passkeys
               <Button onClick={pay} disabled={busy !== null || !intent || support?.paymentRequest === false} className={wrapButton}>
                 {busy === "pay" ? "Paiement en cours…" : intent ? `Payer ${formatEuros(intent.amountCents)} avec le portefeuille` : "Payer avec le portefeuille"}
               </Button>
+              {canSimulate && (
+                <Button variant="secondary" onClick={simulate} disabled={busy !== null} className={wrapButton}>
+                  Simuler le paiement (aucun portefeuille utilisé)
+                </Button>
+              )}
             </div>
             {!verified && <p className="text-sm text-foreground-light">Sans l&apos;étape 1 (moins de 2 minutes), le serveur refuse de donner le montant.</p>}
           </>

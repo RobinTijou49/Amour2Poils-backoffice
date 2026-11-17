@@ -76,7 +76,7 @@ const STEP1 = "Étape 1 : prouver son identité avec une passkey";
 const STEP2 = "Étape 2 : payer avec la Payment Request API";
 
 describe("détection des capacités de l'appareil", () => {
-  test("tout est disponible : trois « Disponible »", async () => {
+  test("Payment Request, WebAuthn et empreinte disponibles : trois « Disponible » (Apple Pay absent de ce faux navigateur)", async () => {
     renderDemo();
     await waitFor(() => expect(screen.getAllByText("Disponible")).toHaveLength(3));
   });
@@ -85,7 +85,8 @@ describe("détection des capacités de l'appareil", () => {
     delete (window as unknown as { PaymentRequest?: unknown }).PaymentRequest;
     routes["/api/demo/paiement/intention"] = { json: { invoiceId: "inv-1", number: "F-2026-0004", amountCents: 8150 } };
     renderDemo({ passkeys: [{ id: "p1", createdAt: "1 janv. 2026", lastUsedAt: null }] });
-    await waitFor(() => expect(screen.getByText("Non disponible")).toBeDefined());
+    // Payment Request ET Apple Pay (absent de ce faux navigateur) : deux « Non disponible ».
+    await waitFor(() => expect(screen.getAllByText("Non disponible")).toHaveLength(2));
     await userEvent.click(screen.getByRole("button", { name: "Demander le montant au serveur" }));
     await screen.findByText(/Le serveur demande/);
     expect((screen.getByRole("button", { name: /^Payer/ }) as HTMLButtonElement).disabled).toBe(true);
@@ -221,6 +222,57 @@ describe("étape 2 : Payment Request", () => {
     await userEvent.click(screen.getByRole("button", { name: /Payer 81,50/ }));
     await waitFor(() => expect(alert(STEP2).textContent).toContain("Aucun portefeuille compatible"));
     expect(shown).toBe(0);
+  });
+
+  test("aucun portefeuille : un bouton de SIMULATION apparaît, étiqueté comme tel, et n'envoie aucun vrai jeton", async () => {
+    renderDemo();
+    await askAmount();
+    expect(screen.queryByRole("button", { name: /Simuler/ })).toBeNull(); // pas avant d'avoir constaté l'absence de portefeuille
+    canMake = false;
+    await userEvent.click(screen.getByRole("button", { name: /Payer 81,50/ }));
+    await waitFor(() => expect(alert(STEP2).textContent).toContain("simuler le paiement"));
+    routes["/api/demo/paiement/confirmation"] = { json: { ok: true, demo: true, message: "Démonstration : aucun débit, facture inchangée." } };
+    await userEvent.click(screen.getByRole("button", { name: "Simuler le paiement (aucun portefeuille utilisé)" }));
+    await waitFor(() => expect(status(STEP2).textContent).toContain("Simulation :"));
+    expect(status(STEP2).textContent).toContain("Aucun portefeuille ni jeton réel");
+    // Le montant envoyé est celui du SERVEUR ; le jeton est explicitement une simulation.
+    expect(calls.at(-1)).toMatchObject({ url: "/api/demo/paiement/confirmation", body: { invoiceId: "inv-1", amountCents: 8150, token: "simulation-sans-portefeuille" } });
+    expect(shown).toBe(0);
+  });
+
+  test("iPhone avec Apple Pay : le message explique le compte Apple Developer au lieu d'accuser Google Pay", async () => {
+    (window as unknown as { ApplePaySession: unknown }).ApplePaySession = { canMakePayments: () => true };
+    try {
+      renderDemo();
+      await waitFor(() => expect(screen.getAllByText("Disponible").length).toBeGreaterThanOrEqual(4));
+      await askAmount();
+      canMake = false;
+      await userEvent.click(screen.getByRole("button", { name: /Payer 81,50/ }));
+      await waitFor(() => expect(alert(STEP2).textContent).toContain("Apple Developer"));
+      expect(alert(STEP2).textContent).not.toContain("Aucun portefeuille compatible");
+    } finally {
+      delete (window as unknown as { ApplePaySession?: unknown }).ApplePaySession;
+    }
+  });
+
+  test("Safari qui refuse le moyen de paiement par une erreur (NotSupportedError) : même explication, simulation proposée", async () => {
+    renderDemo();
+    await askAmount();
+    showError = Object.assign(new Error("x"), { name: "NotSupportedError" });
+    await userEvent.click(screen.getByRole("button", { name: /Payer 81,50/ }));
+    await waitFor(() => expect(alert(STEP2).textContent).toContain("Aucun portefeuille compatible"));
+    expect(screen.getByRole("button", { name: /Simuler/ })).toBeDefined();
+  });
+
+  test("le serveur refuse la simulation (autorisation expirée) : l'erreur est affichée comme pour un vrai paiement", async () => {
+    renderDemo();
+    await askAmount();
+    canMake = false;
+    await userEvent.click(screen.getByRole("button", { name: /Payer 81,50/ }));
+    await screen.findByRole("button", { name: /Simuler/ });
+    routes["/api/demo/paiement/confirmation"] = { status: 403, json: { error: "Confirmation biométrique expirée : recommencez." } };
+    await userEvent.click(screen.getByRole("button", { name: /Simuler/ }));
+    await waitFor(() => expect(alert(STEP2).textContent).toContain("expirée"));
   });
 
   test("aucune facture envoyée : on l'explique au lieu d'afficher un formulaire vide", () => {

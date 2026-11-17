@@ -183,4 +183,20 @@ test.describe("paiement : le montant du navigateur n'est jamais cru", () => {
     await expect(section(page, STEP2).getByRole("alert")).toContainText(/Aucun portefeuille compatible|n'a pas pu s'ouvrir|Paiement annulé/);
     await expect(page.getByRole("button", { name: /^Payer/ })).toBeEnabled();
   });
+
+  test("sans portefeuille (comme sur iPhone sans Apple Pay branché) : la SIMULATION va au bout, le serveur revérifie le montant", async ({ page }) => {
+    await addAuthenticator(page);
+    await open(page);
+    await register(page);
+    await verify(page);
+    await page.getByRole("button", { name: "Demander le montant au serveur" }).click();
+    await expect(section(page, STEP2).getByRole("status")).toContainText("Le serveur demande");
+    // Tant qu'on n'a pas constaté l'absence de portefeuille, la simulation n'est pas proposée.
+    await expect(page.getByRole("button", { name: /Simuler/ })).toHaveCount(0);
+    await page.getByRole("button", { name: /^Payer/ }).click();
+    await expect(section(page, STEP2).getByRole("alert")).toContainText("simuler le paiement");
+    await page.getByRole("button", { name: "Simuler le paiement (aucun portefeuille utilisé)" }).click();
+    await expect(section(page, STEP2).getByRole("status")).toContainText("Simulation : le serveur a revérifié le montant");
+    await expect(section(page, STEP2).getByRole("status")).toContainText("aucun débit");
+  });
 });

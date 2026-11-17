@@ -109,7 +109,7 @@ Maquette : <https://www.figma.com/design/2ju0WFXMpBtETVELEKz6Ee>
   les mêmes noms que les variables CSS de [`globals.css`](src/app/globals.css) : la maquette et le code
   partagent une seule source de tokens.
 - **Contraste** : le vert sauge du site (`#6f7f64`) n'atteint que 4,2:1 sur le fond, sous le seuil AA de 4,5:1.
-  Le back-office utilise un `primary` assombri (`#5f6e55`, 5,3:1 ; texte blanc dessus 5,5:1). Tous les couples
+  Le back-office utilise un `primary` assombri (`#5a6950`, 5,7:1 sur le fond et 4,7:1 sur `sage-soft` ; texte blanc dessus 5,9:1). Tous les couples
   texte / fond de statut dépassent 5:1. La bordure des champs (`border-strong`) atteint 3:1 (WCAG 1.4.11).
 - **Accessibilité intégrée dès la maquette** : boutons et champs de 44 px de haut (WCAG 2.5.8), étiquettes
   toujours visibles, statuts écrits en toutes lettres et pas seulement en couleur (WCAG 1.4.1), onglet actif
@@ -276,7 +276,7 @@ Quatre suites, toutes branchées en CI (`.github/workflows/ci.yml`). Total : 517
 | `bun run test` | **Unitaires** (`src/**/*.test.ts`, 221 tests, ~0,2 s) | Règles métier pures, schémas Zod, dates, sécurité (CSRF, CSP, garde d'API), synchronisation hors ligne. Aucune base. |
 | `bun run test:db` puis `bun run test:int` | **Intégration** (`tests/integration`, 164 tests, ~15 s) | Les vrais Route Handlers et Server Actions, branchés sur une **vraie base PostgreSQL de test** : droits, validation, transactions, notifications, **accès simultanés**. |
 | `bun run test:components` | **Composants** (`tests/components`, 66 tests) | Testing Library + happy-dom : étiquettes et annonces pour lecteurs d'écran, formulaires, bouton de notifications, page hors connexion. |
-| `bun run test:e2e` | **Bout en bout** (`tests/e2e`, 66 tests, ~2 min) | Un vrai **Chromium** (Playwright) pilote la construction de production sur une base dédiée `amour2poils_e2e_test` : connexion, rôles, réservation, accueil, stock, facture, **mode hors connexion avec service worker**, CSP. Premier lancement : `bunx playwright install chromium`. Rapport : `bunx playwright show-report`. |
+| `bun run test:e2e` | **Bout en bout** (`tests/e2e`, 202 tests dont 136 d'accessibilité, ~8 min) | Un vrai **Chromium** (Playwright) pilote la construction de production sur une base dédiée `amour2poils_e2e_test` : connexion, rôles, réservation, accueil, stock, facture, **mode hors connexion avec service worker**, CSP, **accessibilité** (axe WCAG 2.2 AA sur 17 écrans en clair, sombre et téléphone, clavier, focus, cibles, reflow, annonces). Premier lancement : `bunx playwright install chromium`. Rapport : `bunx playwright show-report`. |
 | `bun run test:all` | Unitaires, intégration et composants (pas le E2E, plus lent) | |
 
 **Base de test** : `amour2poils_test`, sur le même serveur Postgres que le développement (`bun run db:up`), créée et migrée par

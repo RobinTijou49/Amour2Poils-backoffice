@@ -53,11 +53,11 @@ describe("QuickAction : arrivée / départ en un clic depuis le tableau de bord"
     expect(calls.checkOut![0]!.data.get("id")).toBe("b9");
   });
 
-  test("après succès : le bouton disparaît (pas de double clic possible) et le message est annoncé (role=status)", async () => {
+  test("après succès : le bouton disparaît (pas de double clic possible) et le message s'affiche", async () => {
     nextResult = { success: "Arrivée d'Oslo enregistrée." };
     render(<QuickAction id="b1" kind="in" dogName="Oslo" />);
     await userEvent.click(screen.getByRole("button"));
-    expect((await screen.findByRole("status")).textContent).toBe("Arrivée d'Oslo enregistrée.");
+    expect(await screen.findByText("Arrivée d'Oslo enregistrée.")).toBeDefined();
     expect(screen.queryByRole("button")).toBeNull();
   });
 
@@ -79,7 +79,7 @@ describe("QuickAction : arrivée / départ en un clic depuis le tableau de bord"
     await waitFor(() => expect(button.disabled).toBe(true));
     await userEvent.click(button);
     release();
-    await screen.findByRole("status");
+    await screen.findByText("ok");
     expect(calls.checkIn).toHaveLength(1);
   });
 });
@@ -115,7 +115,7 @@ describe("RestockForm : entrée de stock depuis l'alerte « stock bas »", () =>
     nextResult = { success: "Stock de « Croquettes chiot » : 17 sac 15 kg." };
     renderForm();
     await userEvent.click(screen.getByRole("button", { name: "Entrée" }));
-    expect((await screen.findByRole("status")).textContent).toContain("17 sac 15 kg");
+    expect((await screen.findByText(/17 sac 15 kg/)).textContent).toContain("Croquettes chiot");
     expect(screen.queryByRole("button")).toBeNull();
   });
 
@@ -138,7 +138,7 @@ describe("RestockForm : entrée de stock depuis l'alerte « stock bas »", () =>
 describe("MarkPaidForm : « Marquer payée » depuis les factures à échéance", () => {
   test("le bouton nomme la facture (utile à un lecteur d'écran qui liste les boutons)", () => {
     render(<MarkPaidForm id="inv1" number="F-2026-0004" />);
-    expect(screen.getByRole("button", { name: "Marquer la facture F-2026-0004 comme payée" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Marquer payée : facture F-2026-0004" })).toBeDefined();
   });
 
   test("envoie l'identifiant de la facture", async () => {
@@ -155,7 +155,7 @@ describe("MarkPaidForm : « Marquer payée » depuis les factures à échéance"
     nextResult = { success: "Facture F-2026-0004 marquée payée." };
     render(<MarkPaidForm id="inv1" number="F-2026-0004" />);
     await userEvent.click(screen.getByRole("button"));
-    expect((await screen.findByRole("status")).textContent).toContain("marquée payée");
+    expect((await screen.findByText(/marquée payée/)).textContent).toContain("F-2026-0004");
     expect(screen.queryByRole("button")).toBeNull();
   });
 
@@ -164,5 +164,43 @@ describe("MarkPaidForm : « Marquer payée » depuis les factures à échéance"
     render(<MarkPaidForm id="inv1" number="F-2026-0004" />);
     await userEvent.click(screen.getByRole("button"));
     expect((await screen.findByRole("alert")).textContent).toContain("gérance");
+  });
+});
+
+describe("annonce aux lecteurs d'écran (zone persistante du layout)", () => {
+  /** Messages envoyés à l'Announcer pendant un test. */
+  const heard: string[] = [];
+  beforeEach(() => {
+    heard.length = 0;
+    window.addEventListener("a2p:announce", (e) => heard.push((e as CustomEvent<string>).detail), { once: false });
+  });
+
+  test("une arrivée réussie est annoncée, même si le composant est ensuite retiré par le rafraîchissement", async () => {
+    nextResult = { success: "Arrivée d'Oslo enregistrée." };
+    const { unmount } = render(<QuickAction id="b1" kind="in" dogName="Oslo" />);
+    await userEvent.click(screen.getByRole("button"));
+    await waitFor(() => expect(heard).toContain("Arrivée d'Oslo enregistrée."));
+    unmount(); // le tableau de bord remplace le bouton par « Fait » : l'annonce est déjà partie
+    expect(heard).toContain("Arrivée d'Oslo enregistrée.");
+  });
+
+  test("une erreur n'est PAS envoyée à la zone d'annonce (elle reste affichée dans le composant, en role=alert)", async () => {
+    nextResult = { error: "Cette action n'est plus possible pour cette réservation." };
+    render(<QuickAction id="b1" kind="in" dogName="Oslo" />);
+    await userEvent.click(screen.getByRole("button"));
+    await screen.findByRole("alert");
+    expect(heard).toHaveLength(0);
+  });
+
+  test("le réapprovisionnement et le paiement sont annoncés eux aussi", async () => {
+    nextResult = { success: "Stock de « Croquettes chiot » : 17 sac 15 kg." };
+    const stock = render(<RestockForm productId="p1" name="Croquettes chiot" unit="sac 15 kg" />);
+    await userEvent.click(screen.getByRole("button", { name: "Entrée" }));
+    await waitFor(() => expect(heard).toContain("Stock de « Croquettes chiot » : 17 sac 15 kg."));
+    stock.unmount();
+    nextResult = { success: "Facture F-2026-0004 marquée payée." };
+    render(<MarkPaidForm id="inv1" number="F-2026-0004" />);
+    await userEvent.click(screen.getByRole("button"));
+    await waitFor(() => expect(heard).toContain("Facture F-2026-0004 marquée payée."));
   });
 });

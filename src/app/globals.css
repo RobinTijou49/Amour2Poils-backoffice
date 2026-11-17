@@ -1,10 +1,21 @@
 @import "tailwindcss";
 
+/* Téléphone : une barre fixe en haut (~93 px) et une en bas (~73 px). Sans marge de défilement, un élément qui reçoit le
+   focus au clavier pouvait passer dessous et devenir invisible (WCAG 2.4.11, mesuré par tests/e2e/a11y-keyboard.spec.ts). */
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 6rem;
+    scroll-padding-bottom: 5.5rem;
+  }
+}
+
 /* Design tokens : mêmes noms que les variables de la maquette Figma
    (collections « Couleurs · Clair » et « Couleurs · Sombre »).
    Base reprise du site vitrine (robintijou49.github.io/Amour2Poils).
    `primary` est un vert sauge assombri : le sauge du site (#6f7f64) n'atteint
-   que 4,2:1 sur le fond, sous le seuil AA de 4,5:1 pour du texte. */
+   que 4,2:1 sur le fond, sous le seuil AA de 4,5:1 pour du texte.
+   Assombri une seconde fois (#5f6e55 -> #5a6950) : le test axe a mesuré 4,37:1 pour `primary` sur `sage-soft`
+   (menu actif, boxes occupées), toujours sous 4,5:1. Désormais 4,72:1 ; texte blanc sur primary 5,9:1. */
 :root {
   --background: #fdfcf9;
   --background-alt: #f5f1e8;
@@ -13,7 +24,7 @@
   --foreground-light: #6b6559;
   --border: #e6e0d4;
   --border-strong: #9a9284;
-  --primary: #5f6e55;
+  --primary: #5a6950;
   --on-primary: #ffffff;
   --sage: #8a9a7e;
   --sage-soft: #e3e8dd;

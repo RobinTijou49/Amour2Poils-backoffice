@@ -69,7 +69,7 @@ test.describe("du séjour à la facture payée", () => {
     await page.getByRole("button", { name: "Ajouter la ligne" }).click();
     await expect(page.getByRole("table", { name: "Lignes de la facture" })).toContainText("Bain et brossage");
     await expect(page.getByText(/Total : 89,98\s€/)).toBeVisible(); // 50 + 2 × 19,99
-    await page.getByRole("button", { name: "Supprimer la ligne Bain et brossage" }).click();
+    await page.getByRole("button", { name: "Retirer la ligne Bain et brossage" }).click();
     await expect(page.getByRole("table", { name: "Lignes de la facture" })).not.toContainText("Bain et brossage");
     await expect(page.getByText(/Total : 50,00\s€/)).toBeVisible();
   });
@@ -94,7 +94,7 @@ test.describe("du séjour à la facture payée", () => {
     invoiceNumber = ((await titre.textContent()) ?? "").replace("Facture ", "");
     await expect(page.getByText("Envoyée", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Ajouter une ligne (supplément, remise…)")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /Supprimer la ligne/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Retirer la ligne/ })).toHaveCount(0);
   });
 
   test("la facture apparaît dans la liste, avec son numéro, son montant et une échéance", async ({ page }) => {

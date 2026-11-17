@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 // Couleur de la barre du navigateur : `primary` en clair, fond sombre en mode sombre.
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#5f6e55" },
+    { media: "(prefers-color-scheme: light)", color: "#5a6950" },
     { media: "(prefers-color-scheme: dark)", color: "#1d1c19" },
   ],
 };

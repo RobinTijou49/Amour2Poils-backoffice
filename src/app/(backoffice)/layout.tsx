@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { MobileUserBar, UserCard, UserNav, UserTabBar } from "@/components/current-user";
+import { Announcer } from "@/components/announcer";
 import { OfflineSync } from "@/components/offline-sync";
 import { SideNavLinks, TabBarLinks } from "@/components/navigation";
 import { focusRing } from "@/components/ui/button";
@@ -12,6 +13,7 @@ export default function BackofficeLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex min-h-full flex-1">
       <OfflineSync />
+      <Announcer />
       <a
         href="#contenu"
         className={`sr-only z-50 rounded-sm bg-primary px-4 py-3 font-bold text-on-primary focus:not-sr-only focus:fixed focus:top-4 focus:left-4 ${focusRing}`}

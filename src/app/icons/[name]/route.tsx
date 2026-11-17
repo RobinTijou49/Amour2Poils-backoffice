@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ nam
   );
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#5f6e55" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#5a6950" }}>
         <div style={{ position: "relative", width: paw, height: paw, display: "flex" }}>
           {dot(0.04, 0.34, toe / paw, (toe * 1.25) / paw)}
           {dot(0.27, 0.12, toe / paw, (toe * 1.25) / paw)}

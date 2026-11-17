@@ -76,7 +76,7 @@ export function RemoveLineButton({ id, label }: { id: string; label: string }) {
   return (
     <form action={action} className="print:hidden">
       <input type="hidden" name="id" value={id} />
-      <Button type="submit" variant="ghost" disabled={pending} aria-label={`Supprimer la ligne ${label}`}>
+      <Button type="submit" variant="ghost" disabled={pending} aria-label={`Retirer la ligne ${label}`}>
         Retirer
       </Button>
       {state.error && <span role="alert" className="text-sm text-danger-fg">{state.error}</span>}

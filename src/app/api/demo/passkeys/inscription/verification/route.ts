@@ -25,8 +25,9 @@ export async function POST(request: Request) {
       expectedRPID: rpID,
       requireUserVerification: true,
     });
-  } catch {
-    return apiError("Inscription refusée : la réponse de l'appareil n'est pas valide.", 400);
+  } catch (error) {
+    // Route de démonstration réservée à la gérance : le motif exact (origine, domaine, défi…) aide à diagnostiquer un déploiement.
+    return apiError(`Inscription refusée : ${error instanceof Error ? error.message : "la réponse de l'appareil n'est pas valide."}`, 400);
   }
   if (!result.verified) return apiError("Inscription refusée.", 400);
   const { credential } = result.registrationInfo;

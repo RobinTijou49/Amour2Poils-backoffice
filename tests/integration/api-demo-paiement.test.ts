@@ -153,6 +153,11 @@ describe("relyingParty : domaine et origine tels que le navigateur les voit", ()
     expect(relyingParty(req)).toEqual({ rpID: "amour2poils.duckdns.org", origin: "https://amour2poils.duckdns.org" });
   });
 
+  test("le Caddy intérieur annonce « http » alors que le visiteur est en HTTPS : l'origine attendue reste https (bug de production)", () => {
+    const req = new Request("http://app:3000/api", { headers: { "x-forwarded-host": "amour2poils.duckdns.org", "x-forwarded-proto": "http" } });
+    expect(relyingParty(req)).toEqual({ rpID: "amour2poils.duckdns.org", origin: "https://amour2poils.duckdns.org" });
+  });
+
   test("en local : http et le port dans l'origine, pas dans le domaine", () => {
     const req = new Request("http://localhost:3300/api", { headers: { host: "localhost:3300" } });
     expect(relyingParty(req)).toEqual({ rpID: "localhost", origin: "http://localhost:3300" });

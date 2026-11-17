@@ -29,8 +29,8 @@ export async function POST(request: Request) {
       credential: { id: passkey.credentialId, publicKey: new Uint8Array(passkey.publicKey), counter: passkey.counter, transports: passkey.transports as Transport[] },
       requireUserVerification: true,
     });
-  } catch {
-    return apiError("Vérification refusée : la signature n'est pas valide.", 400);
+  } catch (error) {
+    return apiError(`Vérification refusée : ${error instanceof Error ? error.message : "la signature n'est pas valide."}`, 400);
   }
   if (!result.verified) return apiError("Vérification refusée.", 400);
   // Le compteur ne fait que croître : un compteur qui recule trahit une clé clonée (la bibliothèque le contrôle).

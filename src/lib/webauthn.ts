@@ -21,9 +21,11 @@ export const PAYMENT_AUTH_WINDOW_MS = 2 * 60_000;
 export function relyingParty(request: Request) {
   const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? new URL(request.url).host).split(",")[0].trim();
   const hostname = host.replace(/:\d+$/, "");
-  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim();
   const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
-  const proto = forwardedProto ?? (isLocal ? new URL(request.url).protocol.replace(":", "") : "https");
+  // X-Forwarded-Proto n'est PAS utilisé : le Caddy intérieur écoute en HTTP simple (le HTTPS est terminé par l'autre Caddy,
+  // devant lui), donc l'en-tête arrive en « http » même pour un visiteur en HTTPS, et l'origine attendue ne correspondrait
+  // plus à celle du navigateur (« https://… »). Le site n'est servi qu'en HTTPS (HSTS) : tout hôte non local est en https.
+  const proto = isLocal ? new URL(request.url).protocol.replace(":", "") : "https";
   return { rpID: hostname, origin: `${proto}://${host}` };
 }
 

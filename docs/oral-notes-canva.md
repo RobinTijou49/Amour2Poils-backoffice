@@ -106,8 +106,15 @@ Preuves : des tests de bout en bout dans un vrai Chromium : application ouverte 
 
 ## Diapo 18 · Partie 3, la notification push (1:00)
 
-Le navigateur s'abonne avec la clé publique du serveur ; l'abonnement est enregistré. Un événement métier déclenche l'envoi, signé avec la clé privée VAPID, qui reste sur le serveur. Le service de push du navigateur livre le message et le service worker l'affiche, même application fermée.
-Trois alertes : nouvelle réservation, stock bas, envoyé une seule fois au franchissement du seuil, et vaccins à renouveler, par une tâche quotidienne. Validé en production sur Chrome PC et sur mon iPhone avec la PWA installée. Sur iPhone : seulement si la PWA est installée.
+Pour comprendre, pensez au courrier. Un message push, c'est une lettre qui arrive même quand on n'est pas à la maison.
+Un : l'abonnement. Quand l'utilisateur appuie sur « Activer les notifications » et accepte, son navigateur reçoit une adresse de livraison, comme une boîte aux lettres. Mon serveur l'enregistre dans sa base : « pour joindre ce téléphone, c'est cette adresse ».
+Deux : l'événement. Quelque chose se passe dans la pension : une réservation arrive, le stock passe sous le seuil, ou une tâche quotidienne repère un vaccin à renouveler.
+Trois : l'envoi. Mon serveur écrit le message, le signe avec sa clé privée pour prouver que c'est bien lui, et le confie au service postal du navigateur : Google pour Chrome, Apple pour l'iPhone. Il ne contacte jamais le téléphone directement.
+Quatre : la livraison. Ce service retrouve le téléphone, même application fermée, et réveille un petit programme qui reste en veille : le service worker. C'est lui qui affiche la notification.
+Cinq : le clic. Toucher la notification ouvre l'application sur la bonne page.
+Ce qu'il faut retenir : la clé privée reste sur le serveur, jamais dans le navigateur ; et l'utilisateur doit accepter, une seule fois, après un geste volontaire.
+Chez moi, trois alertes : nouvelle réservation, stock bas (une seule fois, quand le seuil est franchi), vaccins à renouveler. Validé en production sur Chrome PC et sur mon iPhone, avec la PWA installée.
+Si on me demande pourquoi passer par Google ou Apple : c'est le seul moyen de joindre un téléphone dont l'application est fermée, sans le garder en connexion permanente, ce qui viderait la batterie.
 → **DÉMONSTRATION 2 juste après cette diapo.**
 
 ## Diapo 19 · En bref : paiement sécurisé et NFC (0:40)

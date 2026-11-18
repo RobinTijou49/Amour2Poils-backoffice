@@ -217,6 +217,7 @@ bun run db:up             # lance PostgreSQL (port 5433)
 bun run db:migrate        # applique les migrations
 bun run db:seed           # données de démonstration fictives
 bun run db:seed:extra     # AJOUTE des données de démo (n'efface rien, rejouable) : arrivées du jour, stock réarmé, factures à payer
+bun run demo:video          # enregistre la vidéo de démonstration du hors ligne (téléphone + PC) dans demo-video/
 bun run dev               # http://localhost:3000
 ```
 

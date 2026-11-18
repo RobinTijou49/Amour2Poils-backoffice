@@ -60,3 +60,6 @@ next-env.d.ts
 *.jks
 *.apk
 *.aab
+
+# Vidéo de démonstration générée (bun run demo:video)
+/demo-video/

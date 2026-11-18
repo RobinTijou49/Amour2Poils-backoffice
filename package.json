@@ -15,6 +15,7 @@
     "test:components": "bun test --preload ./tests/components/setup.ts tests/components",
     "test:e2e": "bun run build && playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "demo:video": "playwright test -c playwright.video.config.ts",
     "coverage": "bun scripts/coverage.ts",
     "test:all": "bun run test && bun run test:db && bun run test:int && bun run test:components",
     "postinstall": "bun --bun prisma generate",

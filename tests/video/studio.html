@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Studio · démonstration hors ligne</title>
+<style>
+  :root { --sage: #5a6950; --cream: #f4efe4; --ink: #263028; --ok: #2f7d4f; --off: #b3452f; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1440px; height: 900px; background: var(--cream); font-family: system-ui, "Segoe UI", sans-serif; color: var(--ink); overflow: hidden; }
+  header { height: 74px; display: flex; align-items: center; justify-content: center; padding: 0 24px; background: var(--sage); color: #fffdf7; font-size: 28px; font-weight: 700; text-align: center; line-height: 1.2; }
+  main { display: flex; gap: 28px; justify-content: center; align-items: flex-start; padding: 14px 20px 0; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  figcaption { display: flex; align-items: center; justify-content: space-between; height: 38px; font-size: 20px; font-weight: 700; }
+  .chip { font-size: 16px; padding: 4px 12px; border-radius: 999px; color: #fff; background: var(--ok); white-space: nowrap; }
+  .chip.off { background: var(--off); }
+  video { display: block; background: #fff; border: 3px solid var(--sage); border-radius: 14px; }
+  #phone video { width: 370px; height: 800px; }
+  #pc video { width: 948px; height: 800px; }
+  #pc figcaption { width: 948px; } #phone figcaption { width: 370px; }
+</style>
+</head>
+<body>
+<header id="caption">…</header>
+<main>
+  <figure id="phone"><figcaption><span>Téléphone</span><span class="chip" id="net">Réseau : OK</span></figcaption><video id="vphone" muted playsinline></video></figure>
+  <figure id="pc"><figcaption><span>Ordinateur : réservation de Milo</span><span class="chip" id="pcchip">Toujours connecté</span></figcaption><video id="vpc" muted playsinline></video></figure>
+</main>
+<script>
+  // Lancé par Playwright : start({ phone, pc, pcDelayMs, events }) ; `events` = [{ t (ms depuis le début du téléphone), text, net: "on" | "off" }].
+  window.__done = false;
+  function start(cfg) {
+    const vp = document.getElementById("vphone"), vc = document.getElementById("vpc");
+    const caption = document.getElementById("caption"), net = document.getElementById("net");
+    vp.src = cfg.phone; vc.src = cfg.pc;
+    const ready = (v) => new Promise((r) => (v.readyState >= 3 ? r() : v.addEventListener("canplaythrough", r, { once: true })));
+    Promise.all([ready(vp), ready(vc)]).then(() => {
+      const t0 = performance.now();
+      vp.play();
+      setTimeout(() => vc.play(), Math.max(0, cfg.pcDelayMs));
+      let ended = 0;
+      const finish = () => { if (++ended === 2) setTimeout(() => (window.__done = true), 2500); };
+      vp.addEventListener("ended", finish); vc.addEventListener("ended", finish);
+      (function tick() {
+        const t = performance.now() - t0;
+        const e = [...cfg.events].reverse().find((x) => x.t <= t);
+        if (e) {
+          caption.textContent = e.text;
+          net.textContent = e.net === "off" ? "Mode avion : plus de réseau" : "Réseau : OK";
+          net.classList.toggle("off", e.net === "off");
+        }
+        if (!window.__done) requestAnimationFrame(tick);
+      })();
+    });
+  }
+</script>
+</body>
+</html>

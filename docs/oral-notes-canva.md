@@ -128,6 +128,7 @@ Trois idées. Le hors ligne repose sur trois briques simples : service worker, I
 - **Montrer l'iPhone au jury** : le plus simple est de brancher l'iPhone à un Mac et d'ouvrir QuickTime (Fichier, Nouvel enregistrement vidéo, choisir l'iPhone), ou de le tenir devant une caméra de table. Sinon, racontez ce qui s'affiche. Tester le dispositif la veille.
 - L'iPhone doit avoir **la PWA installée** (icône sur l'écran d'accueil), être **connecté en gérant**, et avoir **les notifications activées** (bouton dans la barre latérale du back-office).
 - **Ne pas être en mode ne pas déranger** : il masquerait la notification de la démo 2. Fermez plutôt les autres applications bruyantes.
+- **Recharger les données de démonstration en production** avant chaque répétition (et le matin de l'oral) : `bash scripts/demo-prod.sh 8` depuis Git Bash, à la racine du projet. Il ajoute 8 arrivées fraîches pour **aujourd'hui** et remet le stock « Démo » juste au-dessus du seuil ; il n'efface rien. Les arrivées des jours précédents non accueillies restent dans la liste : sans importance.
 - Chaque répétition **consomme** une réservation (une arrivée enregistrée ne se refait pas) et du stock : préparez-en pour la répétition **et** pour l'oral (voir plus bas).
 - Prévoir un **plan B** : une courte vidéo d'écran de chaque démonstration dans la galerie du téléphone.
 

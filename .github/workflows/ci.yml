@@ -60,7 +60,7 @@ jobs:
         run: bun run coverage
       - name: Rapport de couverture (lcov)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: couverture
           path: coverage/
@@ -116,7 +116,7 @@ jobs:
         run: bunx playwright test
       - name: Rapport et traces (en cas d'échec)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rapport-playwright
           path: |

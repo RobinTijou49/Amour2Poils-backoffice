@@ -40,8 +40,36 @@
   --info-fg: #44606f;
 }
 
+/* Mode sombre : choisi par le bouton soleil/lune (attribut data-theme posé sur <html>, voir ThemeToggle), sinon réglage du
+   système. Les deux blocs portent les mêmes valeurs : CSS ne permet pas de les partager entre une media query et un sélecteur. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #1d1c19;
+  --background-alt: #26241f;
+  --surface: #2a2823;
+  --foreground: #ece7dc;
+  --foreground-light: #b3ab9b;
+  --border: #3d3a33;
+  --border-strong: #857e70;
+  --primary: #a9b99c;
+  --on-primary: #1d1c19;
+  --sage: #a9b99c;
+  --sage-soft: #333a2e;
+  --brown: #d2ac85;
+  --brown-dark: #e2c3a2;
+  --success-bg: #333a2e;
+  --success-fg: #c1cfb5;
+  --warning-bg: #3d3220;
+  --warning-fg: #e8c98a;
+  --danger-bg: #43271f;
+  --danger-fg: #f0a491;
+  --info-bg: #26323a;
+  --info-fg: #a9c3d1;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --background: #1d1c19;
     --background-alt: #26241f;
     --surface: #2a2823;

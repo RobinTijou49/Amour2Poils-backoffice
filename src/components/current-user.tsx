@@ -2,6 +2,7 @@ import { logout } from "@/app/connexion/actions";
 import { getCurrentUser, roleLabel } from "@/lib/auth";
 import { NotificationToggle } from "./notification-toggle";
 import { SideNav, TabBar } from "./navigation";
+import { ThemeToggle } from "./theme-toggle";
 import { focusRing } from "./ui/button";
 import { Avatar } from "./ui/card";
 import { Icon } from "./ui/icons";
@@ -24,6 +25,7 @@ export async function MobileUserBar() {
     <div className="flex items-center gap-3">
       <span className="text-sm text-foreground-light">{user.name}</span>
       <NotificationToggle compact />
+      <ThemeToggle />
       <form action={logout}>
         <button type="submit" className={`flex min-h-11 items-center gap-2 rounded-sm px-2 font-semibold ${focusRing}`}>
           <Icon name="deconnexion" />
@@ -40,10 +42,11 @@ export async function UserCard() {
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-3 px-3 py-3">
         <Avatar name={user.name} />
-        <span className="flex flex-col text-sm">
+        <span className="flex flex-1 flex-col text-sm">
           <span className="font-semibold">{user.name}</span>
           <span className="text-foreground-light">{roleLabel[user.role]}</span>
         </span>
+        <ThemeToggle />
       </div>
       <NotificationToggle />
       <form action={logout}>

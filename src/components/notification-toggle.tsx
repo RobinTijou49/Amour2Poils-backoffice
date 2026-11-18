@@ -12,6 +12,8 @@ function toKey(base64: string) {
   return Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
 }
 
+const DENIED_TEXT = "Notifications bloquées : autorisez-les dans les réglages du navigateur.";
+
 const post = (method: "POST" | "DELETE", body: unknown) =>
   fetch("/api/push/abonnement", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
@@ -79,7 +81,15 @@ export function NotificationToggle({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex flex-col">
       {status === "denied" ? (
-        <p className="px-3 py-2 text-sm text-foreground-light">Notifications bloquées : autorisez-les dans les réglages du navigateur.</p>
+        compact ? (
+          // Barre du haut du téléphone : pas la place pour une phrase, une icône suffit (texte pour les lecteurs d'écran + infobulle).
+          <p title={DENIED_TEXT} className="flex size-11 items-center justify-center text-foreground-light">
+            <Icon name="alerte" />
+            <span className="sr-only">{DENIED_TEXT}</span>
+          </p>
+        ) : (
+          <p className="px-3 py-2 text-sm text-foreground-light">{DENIED_TEXT}</p>
+        )
       ) : (
         <button
           type="button"

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 import { Nunito, Quicksand } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
@@ -38,8 +39,20 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Rendu à la demande pour toutes les pages : sans cela, une page prérendue au build n'aurait pas de nonce CSP
   // (src/proxy.ts) et ses scripts seraient bloqués.
   await connection();
+  // Le nonce posé par src/proxy.ts autorise ce script en ligne (la CSP interdit tout autre script en ligne).
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang="fr" className={`${quicksand.variable} ${nunito.variable} h-full antialiased`}>
+    // suppressHydrationWarning : le script ci-dessous ajoute data-theme sur <html> avant l'hydratation de React.
+    <html lang="fr" suppressHydrationWarning className={`${quicksand.variable} ${nunito.variable} h-full antialiased`}>
+      <head>
+        {/* Applique le thème choisi (ou celui du système) avant le premier affichage : évite un flash de clair vers sombre. */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("a2p-theme");if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}
         <ServiceWorkerRegister />
       </body>

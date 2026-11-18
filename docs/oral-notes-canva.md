@@ -31,34 +31,26 @@ Trois parties. Un : comparer quatre façons de livrer l'application, PWA, TWA, h
 
 Installation, hors ligne, notifications, biométrie : tout existe sous forme d'API Web. Mais la réponse n'est jamais seulement oui ou non : elle dépend du navigateur, surtout sur iPhone. Mon contexte : un gérant et quelques employés, sur téléphone, parfois sans réseau dans la cour des chenils.
 
-## Diapo 4 · Quatre façons de livrer (0:20)
+## Diapo 4 · Quatre façons de livrer (0:25)
 
-Du plus simple au plus lourd : un lien pour la PWA, le Play Store pour la TWA, les stores mobiles pour l'hybride, un installeur pour le desktop. C'est la même application avec quatre emballages.
+Imaginez que mon site est une recette. Je peux la servir de quatre façons, du plus simple au plus lourd. La PWA : on la prend directement sur le site, avec un lien. La TWA : la même chose, mais dans une boîte du Play Store. L'hybride : une vraie application de téléphone, qui peut utiliser le matériel. Le desktop : un vrai logiciel sur l'ordinateur. Le contenu est le même, seul l'emballage change.
 
 ## Diapo 5 · PWA et TWA (0:40)
 
-PWA : le site, plus un manifeste et un service worker. Un seul code, mise à jour immédiate, zéro euro. TWA : une application Android minimale qui affiche mon site dans Chrome en plein écran, sans barre d'adresse. Elle n'ajoute aucune capacité, elle ajoute de la distribution.
-⚠ Le lien de confiance de la TWA est en ligne et Google le reconnaît, mais je n'ai pas construit l'application ni testé sur Android. Compte Play Store : 25 dollars, une fois, seulement pour publier.
+La PWA, c'est mon site qu'on peut installer comme une application. On le fait depuis le navigateur, sans passer par un store : un lien suffit, c'est gratuit, et quand je mets à jour le site, tout le monde a la nouvelle version tout de suite.
+La TWA, c'est la même PWA mise dans une petite application Android, pour la trouver sur le Play Store. Elle n'apporte aucune nouvelle capacité : elle apporte seulement la présence sur le store. Et elle n'existe pas sur iPhone.
 
-## Diapo 6 · Hybride : à quoi ça sert concrètement (0:40)
+## Diapo 6 · Hybride (0:35)
 
-L'hybride, c'est une vraie application mobile, publiée sur l'App Store et le Play Store, qui contient mon site à l'intérieur, plus des « ponts » vers le téléphone. On le choisit quand la PWA ne suffit plus, pour trois raisons concrètes.
-Un : le matériel. Caméra et scanner avancés, Bluetooth pour un capteur, NFC pour lire une puce, biométrie, fichiers. Chez nous : lire la puce d'un chien sur iPhone, ce que le navigateur ne sait pas faire.
-Deux : la fiabilité sur iPhone. Notifications natives sans dépendre de l'installation depuis Safari, et fonctionnement en arrière-plan.
-Trois : la visibilité. L'application est sur les stores, avec son icône et ses mises à jour.
-Par rapport à la PWA : plus de pouvoir, mais un coût, 99 dollars par an chez Apple, 25 chez Google, et une revue par les stores. Par rapport à la TWA : la TWA reste limitée à ce que Chrome sait faire et n'existe pas sur iPhone ; l'hybride, si. Et on réutilise environ 95 % du code web.
-Les noms d'outils sont sur la diapositive : inutile de les détailler.
+L'hybride, c'est une vraie application de téléphone, sur l'App Store ou le Play Store, qui contient mon site à l'intérieur. On la choisit quand le site ne suffit plus parce qu'il faut utiliser le matériel du téléphone : lire une puce NFC, le Bluetooth, la caméra de façon avancée. En échange, il faut payer des comptes développeur et passer la validation des stores. Mais on réutilise presque tout le code du site.
 
-## Diapo 7 · Desktop : à quoi ça sert concrètement (0:40)
+## Diapo 7 · Desktop (0:35)
 
-Le desktop, c'est un vrai logiciel pour ordinateur qui affiche mon site, installé comme n'importe quel programme. On le choisit quand l'application doit toucher à l'ordinateur lui-même, ce que le navigateur limite ou interdit.
-Concrètement : lire et écrire des fichiers sur le disque, piloter une imprimante, brancher un appareil USB comme un lecteur de puces ou de codes-barres, se lancer au démarrage de l'ordinateur, rester actif en arrière-plan avec une icône dans la barre système.
-Par rapport à la PWA installée sur ordinateur : elle a déjà sa fenêtre, le hors ligne et les notifications, mais elle ne touche pas au système. Le desktop, si, au prix d'un fichier à installer par système, d'une signature du code payante et de mises à jour à gérer.
-Pour une pension : aucun besoin. Le navigateur de la gérante suffit, et c'est justement l'avantage de la PWA.
+Le desktop, c'est un vrai logiciel qu'on installe sur l'ordinateur, qui affiche mon site. On le choisit quand l'application doit toucher à l'ordinateur lui-même : lire des fichiers, piloter une imprimante, brancher un appareil USB, se lancer au démarrage. Pour ma pension, aucun besoin : le navigateur de la gérante suffit.
 
-## Diapo 8 · Comparaison (0:40)
+## Diapo 8 · Comparaison (0:30)
 
-Ne pas tout lire. Trois lignes à retenir : le code réutilisé, 100 % pour la PWA et la TWA, environ 95 % pour l'hybride. Le coût d'entrée : 0 euro, 25 dollars une fois, 99 dollars par an. Et le point qui compte : la PWA, la TWA et l'hybride se distinguent par ce qu'elles donnent en plus : la distribution pour la TWA, le matériel et l'iPhone pour l'hybride, le système de l'ordinateur pour le desktop.
+Ce qu'il faut retenir : plus on avance vers la droite, plus on gagne de pouvoir sur l'appareil, mais plus on paie en démarches, en coût et en mises à jour. La PWA est la seule qui ne demande rien de tout ça. C'est pourquoi je la choisis, et je n'ajoute une couche que si une capacité manque vraiment.
 
 ## Diapo 9 · Limites sur iPhone (0:40)
 

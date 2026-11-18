@@ -104,17 +104,13 @@ Sans l'heure du geste, le serveur daterait l'arrivée au moment de la synchronis
 Limites assumées : sur iPhone, pas de Background Sync, donc la file se rejoue application ouverte. Seuls l'arrivée et le départ se font hors ligne, pas la création d'une réservation. Un conflit n'est pas fusionné : il est signalé. Et il faut changer la version du service worker à chaque déploiement qui modifie les ressources.
 Preuves : des tests de bout en bout dans un vrai Chromium : application ouverte sans réseau, arrivée rejouée avec son heure, geste devenu impossible signalé, effacement à la déconnexion. Plus des tests unitaires de la synchronisation.
 
-## Diapo 18 · Partie 3, la notification push (1:00)
+## Diapo 18 · Partie 3, la notification push (0:50)
 
-Pour comprendre, pensez au courrier. Un message push, c'est une lettre qui arrive même quand on n'est pas à la maison.
-Un : l'abonnement. Quand l'utilisateur appuie sur « Activer les notifications » et accepte, son navigateur reçoit une adresse de livraison, comme une boîte aux lettres. Mon serveur l'enregistre dans sa base : « pour joindre ce téléphone, c'est cette adresse ».
-Deux : l'événement. Quelque chose se passe dans la pension : une réservation arrive, le stock passe sous le seuil, ou une tâche quotidienne repère un vaccin à renouveler.
-Trois : l'envoi. Mon serveur écrit le message, le signe avec sa clé privée pour prouver que c'est bien lui, et le confie au service postal du navigateur : Google pour Chrome, Apple pour l'iPhone. Il ne contacte jamais le téléphone directement.
-Quatre : la livraison. Ce service retrouve le téléphone, même application fermée, et réveille un petit programme qui reste en veille : le service worker. C'est lui qui affiche la notification.
-Cinq : le clic. Toucher la notification ouvre l'application sur la bonne page.
-Ce qu'il faut retenir : la clé privée reste sur le serveur, jamais dans le navigateur ; et l'utilisateur doit accepter, une seule fois, après un geste volontaire.
-Chez moi, trois alertes : nouvelle réservation, stock bas (une seule fois, quand le seuil est franchi), vaccins à renouveler. Validé en production sur Chrome PC et sur mon iPhone, avec la PWA installée.
-Si on me demande pourquoi passer par Google ou Apple : c'est le seul moyen de joindre un téléphone dont l'application est fermée, sans le garder en connexion permanente, ce qui viderait la batterie.
+Pour envoyer une notification à un téléphone, il y a deux choses à comprendre : l'abonnement et la clé VAPID.
+La clé VAPID, c'est la carte d'identité de mon serveur. C'est une paire de deux clés. Une clé publique, que je peux montrer à tout le monde. Une clé privée, que seul mon serveur connaît. Pensez à un cachet de cire : tout le monde peut vérifier qu'il est authentique, mais seul moi peux le poser.
+L'abonnement, c'est l'adresse de livraison du téléphone. Quand l'utilisateur appuie sur « Activer les notifications » et accepte, son navigateur crée une adresse propre à lui. Il la fabrique avec ma clé publique : c'est ce qui dit « seul ce serveur a le droit d'écrire à cette adresse ». Il me la renvoie, avec deux clés pour chiffrer les messages, et mon serveur l'enregistre dans sa base.
+Ensuite, quand il se passe quelque chose, j'envoie le message à cette adresse. Je le signe avec ma clé privée, comme avec le cachet, et je le chiffre avec les clés de l'abonnement. Le service du navigateur, Google ou Apple, vérifie le cachet, livre le message au téléphone sans pouvoir le lire, et le téléphone affiche la notification, même application fermée.
+En une phrase : la clé publique crée l'abonnement, la clé privée prouve que c'est bien moi qui envoie. Et la clé privée ne quitte jamais le serveur.
 → **DÉMONSTRATION 2 juste après cette diapo.**
 
 ## Diapo 19 · En bref : paiement sécurisé et NFC (0:40)
